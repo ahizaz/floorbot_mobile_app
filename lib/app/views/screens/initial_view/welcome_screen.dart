@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_texts.dart';
+import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_primary_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_outlined_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/common/or_divider.dart';
+import 'package:floor_bot_mobile/app/views/screens/auth/views/auth_bottom_sheet.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -89,7 +92,8 @@ class WelcomeScreen extends StatelessWidget {
                       CustomOutlinedButton(
                         text: 'Continue with Google',
                         onPressed: () {
-                          // Handle Google sign in
+                          final authController = Get.put(AuthController());
+                          authController.signInWithGoogle();
                         },
                         leadingIcon: SvgPicture.asset(
                           'assets/svgs/google_icon.svg',
@@ -111,7 +115,11 @@ class WelcomeScreen extends StatelessWidget {
                       CustomPrimaryButton(
                         text: 'Sign in',
                         onPressed: () {
-                          // Navigate to sign in screen
+                          Get.bottomSheet(
+                            const AuthBottomSheet(initialMode: AuthMode.signIn),
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                          );
                         },
                       ),
 
@@ -121,7 +129,11 @@ class WelcomeScreen extends StatelessWidget {
                       CustomTextButton(
                         text: '+ Create an account',
                         onPressed: () {
-                          // Navigate to sign up screen
+                          Get.bottomSheet(
+                            const AuthBottomSheet(initialMode: AuthMode.signUp),
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                          );
                         },
                         textColor: theme.colorScheme.onSurface,
                         fontSize: 16.sp,
