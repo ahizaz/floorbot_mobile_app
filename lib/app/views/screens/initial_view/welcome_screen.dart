@@ -1,0 +1,140 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:floor_bot_mobile/app/core/utils/themes/app_texts.dart';
+import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_primary_button.dart';
+import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_outlined_button.dart';
+import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.dart';
+import 'package:floor_bot_mobile/app/views/widgets/common/or_divider.dart';
+
+class WelcomeScreen extends StatelessWidget {
+  const WelcomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Scaffold(
+      backgroundColor: theme.colorScheme.primary,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top section with dark background
+            Expanded(
+              flex: 6,
+              child: Container(
+                width: double.infinity,
+                padding: EdgeInsets.symmetric(horizontal: 24.w),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Logo
+                    SvgPicture.asset('assets/svgs/app_logo.svg', height: 50.h),
+                    SizedBox(height: 40.h),
+
+                    // Illustration
+                    SvgPicture.asset(
+                      'assets/svgs/welcome_animate.svg',
+                      height: 280.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Bottom section with white background
+            Expanded(
+              flex: 5,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: theme.scaffoldBackgroundColor,
+                  // borderRadius: BorderRadius.only(
+                  //   topLeft: Radius.circular(30.r),
+                  //   topRight: Radius.circular(30.r),
+                  // ),
+                ),
+                child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 24.w,
+                    vertical: 32.h,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Title
+                      Text(
+                        'Your Trade Partner.',
+                        style: AppTextsTheme.headlineMedium.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'Anytime. Anywhere',
+                        style: AppTextsTheme.headlineMedium.copyWith(
+                          color: theme.colorScheme.onSurface,
+                          fontWeight: FontWeight.w700,
+                          height: 1.2,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      SizedBox(height: 32.h),
+
+                      // Continue with Google Button
+                      CustomOutlinedButton(
+                        text: 'Continue with Google',
+                        onPressed: () {
+                          // Handle Google sign in
+                        },
+                        leadingIcon: SvgPicture.asset(
+                          'assets/svgs/google_icon.svg',
+                          width: 24.w,
+                          height: 24.h,
+                        ),
+                        borderColor: Colors.grey[300],
+                        textColor: theme.colorScheme.onSurface,
+                      ),
+
+                      SizedBox(height: 20.h),
+
+                      // Or Divider
+                      const OrDivider(),
+
+                      SizedBox(height: 20.h),
+
+                      // Sign in Button
+                      CustomPrimaryButton(
+                        text: 'Sign in',
+                        onPressed: () {
+                          // Navigate to sign in screen
+                        },
+                      ),
+
+                      SizedBox(height: 16.h),
+
+                      // Create an account Button
+                      CustomTextButton(
+                        text: '+ Create an account',
+                        onPressed: () {
+                          // Navigate to sign up screen
+                        },
+                        textColor: theme.colorScheme.onSurface,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
