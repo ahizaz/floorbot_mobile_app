@@ -4,108 +4,108 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppTextsTheme {
   // Display text styles - largest text
-  static TextStyle displayLarge = GoogleFonts.poppins(
+  static TextStyle displayLarge = GoogleFonts.oswald(
     fontSize: 57.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: -0.25,
   );
 
-  static TextStyle displayMedium = GoogleFonts.poppins(
+  static TextStyle displayMedium = GoogleFonts.oswald(
     fontSize: 45.sp,
     fontWeight: FontWeight.w400,
   );
 
-  static TextStyle displaySmall = GoogleFonts.poppins(
+  static TextStyle displaySmall = GoogleFonts.oswald(
     fontSize: 36.sp,
     fontWeight: FontWeight.w400,
   );
 
   // Headline text styles
-  static TextStyle headlineLarge = GoogleFonts.poppins(
+  static TextStyle headlineLarge = GoogleFonts.oswald(
     fontSize: 32.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle headlineMedium = GoogleFonts.poppins(
+  static TextStyle headlineMedium = GoogleFonts.oswald(
     fontSize: 28.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle headlineSmall = GoogleFonts.poppins(
+  static TextStyle headlineSmall = GoogleFonts.oswald(
     fontSize: 24.sp,
     fontWeight: FontWeight.w600,
   );
 
   // Title text styles
-  static TextStyle titleLarge = GoogleFonts.poppins(
+  static TextStyle titleLarge = GoogleFonts.oswald(
     fontSize: 22.sp,
     fontWeight: FontWeight.w500,
   );
 
-  static TextStyle titleMedium = GoogleFonts.poppins(
+  static TextStyle titleMedium = GoogleFonts.oswald(
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.15,
   );
 
-  static TextStyle titleSmall = GoogleFonts.poppins(
+  static TextStyle titleSmall = GoogleFonts.oswald(
     fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
   // Body text styles - most common text
-  static TextStyle bodyLarge = GoogleFonts.roboto(
+  static TextStyle bodyLarge = GoogleFonts.oswald(
     fontSize: 16.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.5,
   );
 
-  static TextStyle bodyMedium = GoogleFonts.roboto(
+  static TextStyle bodyMedium = GoogleFonts.oswald(
     fontSize: 14.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.25,
   );
 
-  static TextStyle bodySmall = GoogleFonts.roboto(
+  static TextStyle bodySmall = GoogleFonts.oswald(
     fontSize: 12.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
   );
 
   // Label text styles - buttons, tabs, etc.
-  static TextStyle labelLarge = GoogleFonts.roboto(
+  static TextStyle labelLarge = GoogleFonts.oswald(
     fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
-  static TextStyle labelMedium = GoogleFonts.roboto(
+  static TextStyle labelMedium = GoogleFonts.oswald(
     fontSize: 12.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   );
 
-  static TextStyle labelSmall = GoogleFonts.roboto(
+  static TextStyle labelSmall = GoogleFonts.oswald(
     fontSize: 11.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   );
 
   // Custom text styles for specific use cases
-  static TextStyle button = GoogleFonts.poppins(
+  static TextStyle button = GoogleFonts.oswald(
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.5,
   );
 
-  static TextStyle caption = GoogleFonts.roboto(
+  static TextStyle caption = GoogleFonts.oswald(
     fontSize: 12.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
   );
 
-  static TextStyle overline = GoogleFonts.roboto(
+  static TextStyle overline = GoogleFonts.oswald(
     fontSize: 10.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 1.5,
