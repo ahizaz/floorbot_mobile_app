@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:floor_bot_mobile/app/views/screens/bottom_nav/app_nav_view.dart';
 
 enum AuthMode { signIn, signUp, forgotPassword }
 
@@ -139,7 +140,8 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
 
-      Get.back(); // Close bottom sheet
+      // Navigate to dashboard with bottom navigation
+      Get.offAll(() => const AppNavView());
       clearForm();
     } catch (e) {
       Get.snackbar(
@@ -172,7 +174,8 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
 
-      Get.back(); // Close bottom sheet
+      // Navigate to dashboard with bottom navigation
+      Get.offAll(() => const AppNavView());
       clearForm();
     } catch (e) {
       Get.snackbar(
@@ -203,7 +206,8 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
 
-      Get.back(); // Close bottom sheet if open
+      // Navigate to dashboard with bottom navigation
+      Get.offAll(() => const AppNavView());
       clearForm();
     } catch (e) {
       Get.snackbar(
