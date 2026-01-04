@@ -1,19 +1,133 @@
-import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
+import 'package:floor_bot_mobile/app/controllers/explore_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/nav_controller.dart';
+import 'package:floor_bot_mobile/app/views/widgets/explore/explore_header.dart';
+import 'package:floor_bot_mobile/app/views/widgets/explore/category_card.dart';
+import 'package:floor_bot_mobile/app/views/widgets/explore/product_card.dart';
+import 'package:floor_bot_mobile/app/views/widgets/explore/section_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class ExploreTab extends StatelessWidget {
   const ExploreTab({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
+    final controller = Get.put(ExploreController());
+    final navController = Get.find<NavController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          Container(decoration: BoxDecoration(color: AppColors.primaryColor)),
+          // Header
+          ExploreHeader(
+            userName: 'Sebastian',
+            location: 'Los Angeles, USA',
+            onSearchTap: () {
+              // Navigate to search tab
+              navController.changeTab(1);
+            },
+            onNotificationTap: () {
+              // TODO: Implement notifications
+            },
+            onProfileTap: () {
+              // TODO: Implement profile
+            },
+          ),
+
+          // Scrollable content
+          Expanded(
+            child: SingleChildScrollView(
+              child: Obx(
+                () => Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 20.h),
+
+                    // Categories
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: controller.categories.map((category) {
+                          return CategoryCard(
+                            title: category.name,
+                            imageAsset: category.imageAsset,
+                            onTap: () => controller.onCategoryTap(category.id),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+
+                    SizedBox(height: 24.h),
+
+                    // New arrival section
+                    SectionHeader(
+                      title: 'New arrival',
+                      onShowAllTap: () => controller.onShowAllNewArrivals(),
+                    ),
+
+                    SizedBox(
+                      height: 220.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        itemCount: controller.newArrivals.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(width: 16.w),
+                        itemBuilder: (context, index) {
+                          final product = controller.newArrivals[index];
+                          return ProductCard(
+                            imageAsset: product.imageAsset,
+                            title: product.name,
+                            subtitle: product.description,
+                            price: '\$${product.price.toStringAsFixed(2)}/box',
+                            onTap: () => controller.onProductTap(product.id),
+                            onAddTap: () => controller.onAddToCart(product),
+                          );
+                        },
+                      ),
+                    ),
+
+                    SizedBox(height: 16.h),
+
+                    // Best deals section
+                    SectionHeader(
+                      title: 'Best deals',
+                      onShowAllTap: () => controller.onShowAllBestDeals(),
+                    ),
+
+                    SizedBox(
+                      height: 220.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        itemCount: controller.bestDeals.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(width: 16.w),
+                        itemBuilder: (context, index) {
+                          final product = controller.bestDeals[index];
+                          return ProductCard(
+                            imageAsset: product.imageAsset,
+                            title: product.name,
+                            subtitle: product.description,
+                            price: '\$${product.price.toStringAsFixed(2)}/box',
+                            onTap: () => controller.onProductTap(product.id),
+                            onAddTap: () => controller.onAddToCart(product),
+                          );
+                        },
+                      ),
+                    ),
+
+                    SizedBox(
+                      height: 100.h,
+                    ), // Extra padding for floating bottom nav
+                  ],
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

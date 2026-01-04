@@ -1,4 +1,4 @@
-import 'package:floor_bot_mobile/app/views/screens/search/search_tab.dart';
+import 'package:floor_bot_mobile/app/views/screens/search/search_screendart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/explore/explore_screen.dart';
