@@ -38,6 +38,7 @@ class AuthBottomSheet extends StatelessWidget {
       ),
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        resizeToAvoidBottomInset: true,
         body: SafeArea(
           child: Column(
             children: [
@@ -77,6 +78,8 @@ class AuthBottomSheet extends StatelessWidget {
               Expanded(
                 child: SingleChildScrollView(
                   padding: EdgeInsets.symmetric(horizontal: 24.w),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
                   child: Obx(() {
                     // If in forgot password mode, show ForgotPasswordView
                     if (controller.authMode == AuthMode.forgotPassword) {
