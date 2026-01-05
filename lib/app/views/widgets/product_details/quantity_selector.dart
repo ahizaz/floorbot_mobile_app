@@ -30,40 +30,56 @@ class QuantitySelector extends StatelessWidget {
         ),
         SizedBox(height: 8.h),
         Container(
+          height: 56.h,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey[300]!),
+            border: Border.all(color: Colors.grey[300]!, width: 1),
             borderRadius: BorderRadius.circular(12.r),
+            color: Colors.white,
           ),
           child: Row(
             children: [
               Expanded(
+                flex: 3,
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                  padding: EdgeInsets.only(left: 20.w),
                   child: TextField(
                     controller: controller,
                     keyboardType: TextInputType.number,
                     style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.w500,
                       color: Colors.black87,
                     ),
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 12.h),
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
                     ),
                     onChanged: onChanged,
                   ),
                 ),
               ),
-              Container(width: 1, height: 40.h, color: Colors.grey[300]),
-              IconButton(
-                onPressed: onDecrement,
-                icon: Icon(Icons.remove, color: Colors.black87, size: 20.sp),
+              Container(width: 1, height: 56.h, color: Colors.grey[300]),
+              SizedBox(
+                width: 56.w,
+                child: IconButton(
+                  onPressed: onDecrement,
+                  icon: Icon(
+                    Icons.remove,
+                    color: Colors.grey[700],
+                    size: 20.sp,
+                  ),
+                  padding: EdgeInsets.zero,
+                ),
               ),
-              Container(width: 1, height: 40.h, color: Colors.grey[300]),
-              IconButton(
-                onPressed: onIncrement,
-                icon: Icon(Icons.add, color: Colors.black87, size: 20.sp),
+              Container(width: 1, height: 56.h, color: Colors.grey[300]),
+              SizedBox(
+                width: 56.w,
+                child: IconButton(
+                  onPressed: onIncrement,
+                  icon: Icon(Icons.add, color: Colors.grey[700], size: 20.sp),
+                  padding: EdgeInsets.zero,
+                ),
               ),
             ],
           ),

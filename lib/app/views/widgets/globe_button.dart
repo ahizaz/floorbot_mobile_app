@@ -23,7 +23,7 @@ class GlobeButton extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.primaryColor,
-        borderRadius: BorderRadius.circular(10.r),
+        borderRadius: BorderRadius.circular(50.r),
       ),
       child: Row(
         children: [

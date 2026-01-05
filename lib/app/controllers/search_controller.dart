@@ -1,6 +1,6 @@
 import 'package:floor_bot_mobile/app/core/utils/app_images.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
-import 'package:floor_bot_mobile/app/views/widgets/explore/products/products_details.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
