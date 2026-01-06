@@ -1,8 +1,8 @@
+import 'package:floor_bot_mobile/app/views/screens/cart/my_cart_view.dart';
 import 'package:floor_bot_mobile/app/views/screens/search/search_screendart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/explore/explore_screen.dart';
-import 'package:floor_bot_mobile/app/views/screens/mycart/cart_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/orders/orders_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/settings_tab.dart';
 
@@ -13,7 +13,7 @@ class NavController extends GetxController {
   final List<Widget> _screens = [
     const ExploreTab(),
     const SearchTab(),
-    const CartTab(),
+    const MyCartView(),
     const OrdersTab(),
     const SettingsTab(),
   ];

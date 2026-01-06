@@ -20,23 +20,23 @@ class MyCartView extends StatelessWidget {
         leading: Row(
           children: [
             SizedBox(width: 4.w),
-            IconButton(
-              onPressed: () => Get.back(),
-              icon: Icon(
-                Icons.arrow_back_ios,
-                color: Colors.white,
-                size: 18.sp,
-              ),
-              padding: EdgeInsets.zero,
-            ),
-            Text(
-              'Back',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
+            // IconButton(
+            //   onPressed: () => Get.back(),
+            //   icon: Icon(
+            //     Icons.arrow_back_ios,
+            //     color: Colors.white,
+            //     size: 18.sp,
+            //   ),
+            //   padding: EdgeInsets.zero,
+            // ),
+            // Text(
+            //   'Back',
+            //   style: TextStyle(
+            //     color: Colors.white,
+            //     fontSize: 16.sp,
+            //     fontWeight: FontWeight.w400,
+            //   ),
+            // ),
           ],
         ),
         leadingWidth: 100.w,
