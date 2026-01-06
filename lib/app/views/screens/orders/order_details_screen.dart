@@ -387,9 +387,9 @@ class OrderDetailsScreen extends StatelessWidget {
               Navigator.pop(context); // Close dialog
               Navigator.pop(context); // Close order details screen
 
-              // Show feedback bottom sheet after a short delay
+              // Show feedback bottom sheet after a short delay using Get
               Future.delayed(const Duration(milliseconds: 300), () {
-                _showFeedbackBottomSheet(context);
+                _showFeedbackBottomSheet();
               });
             },
             child: const Text('Confirm'),
@@ -399,16 +399,13 @@ class OrderDetailsScreen extends StatelessWidget {
     );
   }
 
-  void _showFeedbackBottomSheet(BuildContext context) {
+  void _showFeedbackBottomSheet() {
     final TextEditingController feedbackController = TextEditingController();
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
+    Get.bottomSheet(
+      Padding(
         padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
+          bottom: MediaQuery.of(Get.context!).viewInsets.bottom,
         ),
         child: Container(
           decoration: BoxDecoration(
@@ -483,7 +480,7 @@ class OrderDetailsScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        Get.back();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.grey[200],
@@ -513,13 +510,15 @@ class OrderDetailsScreen extends StatelessWidget {
                         final feedback = feedbackController.text.trim();
                         if (feedback.isNotEmpty) {
                           // TODO: Send feedback to backend
+                          Get.back();
                           Get.snackbar(
                             'Thank you!',
                             'Your feedback has been submitted',
                             snackPosition: SnackPosition.BOTTOM,
                           );
+                        } else {
+                          Get.back();
                         }
-                        Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF2D3142),
@@ -545,6 +544,10 @@ class OrderDetailsScreen extends StatelessWidget {
           ),
         ),
       ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      isDismissible: true,
+      enableDrag: true,
     );
   }
 }

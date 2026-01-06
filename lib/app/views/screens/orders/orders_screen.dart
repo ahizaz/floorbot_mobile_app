@@ -1,3 +1,4 @@
+import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -35,12 +36,13 @@ class _OrdersTabState extends State<OrdersTab>
     return Scaffold(
       backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.primaryColor,
         elevation: 0,
         title: Text(
           'Orders',
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
+            color: Colors.white,
           ),
         ),
         bottom: PreferredSize(
