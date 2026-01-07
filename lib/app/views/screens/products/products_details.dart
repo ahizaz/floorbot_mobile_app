@@ -174,7 +174,7 @@ class ProductsDetails extends StatelessWidget {
                           ],
                         ),
 
-                        SizedBox(height: 20.h),
+                        SizedBox(height: 16.h),
 
                         // Expandable sections
                         Obx(
@@ -185,7 +185,7 @@ class ProductsDetails extends StatelessWidget {
                             expandedContent: Text(
                               'High-quality ${product.name.toLowerCase()} flooring. Perfect for residential and commercial spaces. Durable and easy to maintain.',
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 13.sp,
                                 color: Colors.grey[700],
                                 height: 1.5,
                               ),
@@ -201,7 +201,7 @@ class ProductsDetails extends StatelessWidget {
                             expandedContent: Text(
                               '30-day return policy. Items must be in original condition with packaging. Return shipping costs may apply.',
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 13.sp,
                                 color: Colors.grey[700],
                                 height: 1.5,
                               ),

@@ -32,24 +32,24 @@ class FloorCalculatorWidget extends StatelessWidget {
           children: [
             // Length input
             Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Length',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 6.h),
                   Container(
-                    height: 70.h,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    height: 56.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(color: Colors.grey[300]!, width: 1),
                     ),
                     child: Center(
@@ -58,7 +58,7 @@ class FloorCalculatorWidget extends StatelessWidget {
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 36.sp,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
@@ -68,7 +68,7 @@ class FloorCalculatorWidget extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           hintText: '0',
                           hintStyle: TextStyle(
-                            fontSize: 36.sp,
+                            fontSize: 28.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[300],
                           ),
@@ -79,28 +79,28 @@ class FloorCalculatorWidget extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: 8.w),
 
             // Width input
             Expanded(
+              flex: 3,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Width',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 6.h),
                   Container(
-                    height: 70.h,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    height: 56.h,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(color: Colors.grey[300]!, width: 1),
                     ),
                     child: Center(
@@ -109,7 +109,7 @@ class FloorCalculatorWidget extends StatelessWidget {
                         keyboardType: TextInputType.number,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 36.sp,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.black87,
                         ),
@@ -119,7 +119,7 @@ class FloorCalculatorWidget extends StatelessWidget {
                           contentPadding: EdgeInsets.zero,
                           hintText: '0',
                           hintStyle: TextStyle(
-                            fontSize: 36.sp,
+                            fontSize: 28.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.grey[300],
                           ),
@@ -130,49 +130,53 @@ class FloorCalculatorWidget extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(width: 12.w),
+            SizedBox(width: 8.w),
 
             // Unit dropdown
             Expanded(
+              flex: 2,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'Unit',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 13.sp,
                       color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(height: 8.h),
+                  SizedBox(height: 6.h),
                   Container(
-                    height: 70.h,
-                    padding: EdgeInsets.symmetric(horizontal: 12.w),
+                    height: 56.h,
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(color: Colors.grey[300]!, width: 1),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: selectedUnit,
                         isExpanded: true,
-                        isDense: false,
+                        isDense: true,
                         icon: Icon(
                           Icons.keyboard_arrow_down,
-                          size: 24.sp,
+                          size: 20.sp,
                           color: Colors.black87,
                         ),
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 13.sp,
                           color: Colors.black87,
                           fontWeight: FontWeight.w500,
                         ),
                         items: ['Sqr. m.', 'Sqr. ft.'].map((String value) {
                           return DropdownMenuItem<String>(
                             value: value,
-                            child: Text(value),
+                            child: Text(
+                              value,
+                              style: TextStyle(fontSize: 12.sp),
+                            ),
                           );
                         }).toList(),
                         onChanged: onUnitChanged,
@@ -185,15 +189,15 @@ class FloorCalculatorWidget extends StatelessWidget {
           ],
         ),
 
-        SizedBox(height: 16.h),
+        SizedBox(height: 12.h),
 
         // Product size
         Text(
           'Product size: $productSize',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 13.sp,
             color: Colors.black87,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         ),
 
@@ -203,9 +207,9 @@ class FloorCalculatorWidget extends StatelessWidget {
         Text(
           'Quantity: $quantity pcs',
           style: TextStyle(
-            fontSize: 14.sp,
+            fontSize: 13.sp,
             color: Colors.black87,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w500,
           ),
         ),
 
@@ -213,12 +217,19 @@ class FloorCalculatorWidget extends StatelessWidget {
 
         // Result
         if (calculatedBoxes > 0)
-          Text(
-            'You\'ll need $calculatedBoxes box',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.blue[600],
-              fontWeight: FontWeight.w600,
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+            decoration: BoxDecoration(
+              color: Colors.blue[50],
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              'You\'ll need $calculatedBoxes ${calculatedBoxes == 1 ? 'box' : 'boxes'}',
+              style: TextStyle(
+                fontSize: 13.sp,
+                color: Colors.blue[700],
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
       ],

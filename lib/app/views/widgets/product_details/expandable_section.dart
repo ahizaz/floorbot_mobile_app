@@ -18,9 +18,9 @@ class ExpandableSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
+      margin: EdgeInsets.only(bottom: 8.h),
       decoration: BoxDecoration(
-        color: Colors.grey[200],
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
@@ -29,24 +29,26 @@ class ExpandableSection extends StatelessWidget {
             onTap: onTap,
             borderRadius: BorderRadius.circular(12.r),
             child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   Icon(
                     isExpanded
                         ? Icons.keyboard_arrow_up
                         : Icons.keyboard_arrow_down,
-                    color: Colors.grey[600],
-                    size: 24.sp,
+                    color: Colors.grey[700],
+                    size: 20.sp,
                   ),
                 ],
               ),
@@ -54,7 +56,7 @@ class ExpandableSection extends StatelessWidget {
           ),
           if (isExpanded && expandedContent != null)
             Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 14.h),
+              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
               child: expandedContent,
             ),
         ],
