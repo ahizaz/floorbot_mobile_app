@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/models/ai_prompt.dart';
+import 'package:floor_bot_mobile/app/views/screens/ai_products/ai_products_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -45,9 +46,21 @@ class AiAssistantController extends GetxController {
   }
 
   void handlePromptTap(AiPrompt prompt) {
-    textController.text = prompt.description;
-    currentMessage.value = prompt.description;
-    // TODO: Handle AI prompt submission
+    // Check if it's Carpets or Catalogue prompt
+    if (prompt.title.toLowerCase() == 'carpets' ||
+        prompt.title.toLowerCase() == 'catalogue') {
+      // Navigate to AI Products Screen
+      Get.to(
+        () => AiProductsScreen(category: prompt.title),
+        transition: Transition.cupertino,
+        duration: const Duration(milliseconds: 300),
+      );
+    } else {
+      // For other prompts, fill the text field
+      textController.text = prompt.description;
+      currentMessage.value = prompt.description;
+      // TODO: Handle other AI prompt submissions
+    }
   }
 
   void handleSend() {

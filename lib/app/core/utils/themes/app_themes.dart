@@ -22,10 +22,10 @@ class AppThemes {
         onSurface: AppColors.textColor,
         onError: Colors.white,
       ),
-      textTheme: AppTextsTheme.textTheme().apply(
-        bodyColor: AppColors.textColor,
-        displayColor: AppColors.textColor,
-      ),
+      // textTheme: AppTextsTheme.textTheme().apply(
+      //   bodyColor: AppColors.textColor,
+      //   displayColor: AppColors.textColor,
+      // ),
 
       // AppBar Theme
       appBarTheme: AppBarTheme(
