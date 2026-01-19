@@ -210,7 +210,7 @@ class _AiProductsScreenState extends State<AiProductsScreen>
                     imageAsset: product.imageAsset,
                     title: product.name,
                     subtitle: product.description,
-                    price: '\$${product.price.toStringAsFixed(2)}/box',
+                    price: controller.formatProductPrice(product),
                     onTap: () {
                       // TODO: Navigate to product details
                       Get.to(ProductsDetails(product: product));

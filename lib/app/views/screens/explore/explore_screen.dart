@@ -1,5 +1,6 @@
 import 'package:floor_bot_mobile/app/controllers/explore_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/nav_controller.dart';
+import 'package:floor_bot_mobile/app/views/screens/calculator_test_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/explore_header.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/category_card.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/product_card.dart';
@@ -82,7 +83,7 @@ class ExploreTab extends StatelessWidget {
                             imageAsset: product.imageAsset,
                             title: product.name,
                             subtitle: product.description,
-                            price: '\$${product.price.toStringAsFixed(2)}/box',
+                            price: controller.formatProductPrice(product),
                             onTap: () => controller.onProductTap(product.id),
                             onAddTap: () => controller.onAddToCart(product),
                           );
@@ -112,7 +113,7 @@ class ExploreTab extends StatelessWidget {
                             imageAsset: product.imageAsset,
                             title: product.name,
                             subtitle: product.description,
-                            price: '\$${product.price.toStringAsFixed(2)}/box',
+                            price: controller.formatProductPrice(product),
                             onTap: () => controller.onProductTap(product.id),
                             onAddTap: () => controller.onAddToCart(product),
                           );
@@ -129,6 +130,14 @@ class ExploreTab extends StatelessWidget {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        heroTag: "calculator_test_fab",
+        onPressed: () {
+          Get.to(() => const CalculatorTestScreen());
+        },
+        backgroundColor: Colors.blue[600],
+        child: const Icon(Icons.calculate, color: Colors.white),
       ),
     );
   }

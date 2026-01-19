@@ -1,10 +1,13 @@
+import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
+
 class Product {
   final String id;
   final String name;
   final String description;
-  final double price;
+  final double price; // Price in GBP (base currency)
   final String imageAsset;
   final String category;
+  final ProductCalculatorConfig calculatorConfig;
 
   Product({
     required this.id,
@@ -13,7 +16,9 @@ class Product {
     required this.price,
     required this.imageAsset,
     required this.category,
-  });
+    ProductCalculatorConfig? calculatorConfig,
+  }) : calculatorConfig =
+           calculatorConfig ?? ProductCalculatorConfig.disabled();
 }
 
 class Category {

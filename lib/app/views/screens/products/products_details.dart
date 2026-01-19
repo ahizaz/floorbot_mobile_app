@@ -1,8 +1,9 @@
 import 'package:floor_bot_mobile/app/controllers/product_details_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
+import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:floor_bot_mobile/app/views/widgets/product_details/expandable_section.dart';
-import 'package:floor_bot_mobile/app/views/widgets/product_details/floor_calculator_widget.dart';
+import 'package:floor_bot_mobile/app/views/widgets/product_details/enhanced_floor_calculator_widget.dart';
 import 'package:floor_bot_mobile/app/views/widgets/product_details/product_image_carousel.dart';
 import 'package:floor_bot_mobile/app/views/widgets/product_details/quantity_selector.dart';
 import 'package:flutter/material.dart';
@@ -119,7 +120,7 @@ class ProductsDetails extends StatelessWidget {
 
                   // Product info section
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -137,12 +138,14 @@ class ProductsDetails extends StatelessWidget {
                         // Price and stock
                         Row(
                           children: [
-                            Text(
-                              '\$${product.price.toStringAsFixed(2)}/box',
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
+                            Obx(
+                              () => Text(
+                                '${controller.formattedPrice}/box',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black87,
+                                ),
                               ),
                             ),
                             SizedBox(width: 8.w),
@@ -209,30 +212,38 @@ class ProductsDetails extends StatelessWidget {
                           ),
                         ),
 
-                        Obx(
-                          () => ExpandableSection(
-                            title: 'Floor calculator',
-                            isExpanded: controller.isCalculatorExpanded.value,
-                            onTap: controller.toggleCalculator,
-                            expandedContent: Obx(
-                              () => FloorCalculatorWidget(
-                                lengthController: lengthController,
-                                widthController: widthController,
-                                selectedUnit: controller.selectedUnit.value,
-                                onUnitChanged: (value) {
-                                  if (value != null) {
-                                    controller.updateUnit(value);
-                                  }
-                                },
-                                productSize: controller.productSize.value,
-                                quantity:
-                                    20, // Based on calculation shown in design
-                                calculatedBoxes:
-                                    controller.calculatedBoxes.value,
+                        // Floor calculator section - only show if calculator is enabled
+                        if (product.calculatorConfig.calculatorType ==
+                            CalculatorType.enabled)
+                          Obx(
+                            () => ExpandableSection(
+                              title: 'Floor calculator',
+                              isExpanded: controller.isCalculatorExpanded.value,
+                              onTap: controller.toggleCalculator,
+                              expandedContent: Obx(
+                                () => EnhancedFloorCalculatorWidget(
+                                  lengthController: lengthController,
+                                  widthController: widthController,
+                                  selectedUnit: controller.selectedUnit.value,
+                                  onUnitChanged: (value) {
+                                    if (value != null) {
+                                      controller.updateUnit(value);
+                                    }
+                                  },
+                                  config: product.calculatorConfig,
+                                  selectedWidth: controller.selectedWidth.value,
+                                  onWidthChanged:
+                                      controller.updateSelectedWidth,
+                                  calculatedArea:
+                                      controller.calculatedArea.value,
+                                  calculatedBoxes:
+                                      controller.calculatedBoxes.value,
+                                  calculationResult:
+                                      controller.calculationResult.value,
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
                         SizedBox(height: 16.h),
 
@@ -264,7 +275,7 @@ class ProductsDetails extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '\$${controller.estimatedCost.toStringAsFixed(2)}',
+                                controller.formattedEstimatedCost,
                                 style: TextStyle(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.bold,

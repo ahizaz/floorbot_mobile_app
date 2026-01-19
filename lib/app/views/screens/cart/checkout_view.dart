@@ -1,5 +1,7 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/shipping_address_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
+import 'package:floor_bot_mobile/app/views/screens/shipping/shipping_address_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -226,12 +228,31 @@ class CheckoutView extends StatelessWidget {
                               color: Colors.grey[700],
                             ),
                             SizedBox(width: 8.w),
-                            Text(
-                              'Change',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w500,
+                            GestureDetector(
+                              onTap: () async {
+                                final result = await Get.to(
+                                  () => const ShippingAddressScreen(),
+                                  transition: Transition.cupertino,
+                                );
+                                if (result != null) {
+                                  // Handle updated address
+                                  Get.snackbar(
+                                    'Address Updated',
+                                    'Your delivery address has been updated.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.green,
+                                    colorText: Colors.white,
+                                  );
+                                }
+                              },
+                              child: Text(
+                                'Change',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: Colors.blue[600],
+                                  fontWeight: FontWeight.w500,
+                                  decoration: TextDecoration.underline,
+                                ),
                               ),
                             ),
                           ],
@@ -263,13 +284,39 @@ class CheckoutView extends StatelessWidget {
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // Handle payment
-                    Get.snackbar(
-                      'Payment',
-                      'Proceeding to payment...',
-                      snackPosition: SnackPosition.BOTTOM,
+                  onPressed: () async {
+                    // First check if we need to collect shipping address
+                    final result = await Get.to(
+                      () => const ShippingAddressScreen(),
+                      transition: Transition.cupertino,
                     );
+
+                    if (result != null) {
+                      // Address collected successfully, proceed to payment
+                      Get.snackbar(
+                        'Success',
+                        'Proceeding to payment...',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+
+                      // Here you would typically navigate to payment screen
+                      // For now, we'll just show a success message
+                      await Future.delayed(const Duration(seconds: 1));
+
+                      Get.snackbar(
+                        'Order Placed',
+                        'Your order has been placed successfully!',
+                        snackPosition: SnackPosition.BOTTOM,
+                        backgroundColor: Colors.green,
+                        colorText: Colors.white,
+                      );
+
+                      // Navigate back to main app
+                      Get.back(); // Go back to cart
+                      Get.back(); // Go back to explore/main screen
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF2C3E50),
@@ -283,15 +330,15 @@ class CheckoutView extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
+                      Icon(Icons.local_shipping_outlined, size: 20.sp),
+                      SizedBox(width: 8.w),
                       Text(
-                        'Proceed to payment',
+                        'Enter Shipping Address',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      Icon(Icons.arrow_forward, size: 20.sp),
                     ],
                   ),
                 ),

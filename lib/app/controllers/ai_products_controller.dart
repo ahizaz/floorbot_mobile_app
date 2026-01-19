@@ -1,4 +1,6 @@
+import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
+import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:get/get.dart';
 
 class AiProductsController extends GetxController {
@@ -13,6 +15,9 @@ class AiProductsController extends GetxController {
   final String category;
 
   AiProductsController({required this.category});
+
+  // Get currency controller
+  CurrencyController get currencyController => Get.find<CurrencyController>();
 
   @override
   void onInit() {
@@ -32,6 +37,9 @@ class AiProductsController extends GetxController {
         price: 39.00,
         imageAsset: 'assets/images/solid_wood.png',
         category: 'Wood',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 28.0,
+        ),
       ),
       Product(
         id: '2',
@@ -40,6 +48,9 @@ class AiProductsController extends GetxController {
         price: 39.00,
         imageAsset: 'assets/images/solid_wood.png',
         category: 'Wood',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 28.0,
+        ),
       ),
       Product(
         id: '3',
@@ -48,6 +59,9 @@ class AiProductsController extends GetxController {
         price: 39.00,
         imageAsset: 'assets/images/solid_wood.png',
         category: 'Wood',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 28.0,
+        ),
       ),
       Product(
         id: '4',
@@ -119,4 +133,9 @@ class AiProductsController extends GetxController {
   }
 
   int get totalProductsFound => filteredProducts.length;
+
+  // Format price for display
+  String formatProductPrice(Product product) {
+    return '${currencyController.formatPrice(product.price)}/box';
+  }
 }

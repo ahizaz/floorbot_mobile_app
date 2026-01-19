@@ -1,5 +1,5 @@
 import 'package:floor_bot_mobile/app/views/screens/cart/my_cart_view.dart';
-import 'package:floor_bot_mobile/app/views/screens/search/search_screendart';
+import 'package:floor_bot_mobile/app/views/screens/search/search_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/explore/explore_screen.dart';

@@ -1,5 +1,7 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
+import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:floor_bot_mobile/app/views/widgets/product_details/add_to_cart_success_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,14 +17,31 @@ class ProductDetailsController extends GetxController {
   final RxString length = ''.obs;
   final RxString width = ''.obs;
   final RxString selectedUnit = 'Sqr. m.'.obs;
-  final RxString productSize = '4x4 Sqr.m'.obs;
+  final Rx<SheetWidth?> selectedWidth = Rx<SheetWidth?>(null);
+  final RxDouble calculatedArea = 0.0.obs;
   final RxInt calculatedBoxes = 0.obs;
+  final RxString calculationResult = ''.obs;
 
   late Product product;
   final PageController pageController = PageController();
 
+  // Get currency controller
+  CurrencyController get currencyController => Get.find<CurrencyController>();
+
   void initProduct(Product prod) {
     product = prod;
+
+    // Auto-expand calculator if enabled for this product
+    if (product.calculatorConfig.calculatorType == CalculatorType.enabled) {
+      isCalculatorExpanded.value = true;
+    }
+
+    // Initialize width selection for sheet-based products
+    if (product.calculatorConfig.productType == ProductType.carpet) {
+      selectedWidth.value = SheetWidth.getCarpetWidths().first;
+    } else if (product.calculatorConfig.productType == ProductType.vinyl) {
+      selectedWidth.value = SheetWidth.getVinylWidths().first;
+    }
   }
 
   @override
@@ -50,6 +69,10 @@ class ProductDetailsController extends GetxController {
 
   double get estimatedCost => product.price * quantity.value;
 
+  String get formattedPrice => currencyController.formatPrice(product.price);
+  String get formattedEstimatedCost =>
+      currencyController.formatPrice(estimatedCost);
+
   void onPageChanged(int index) {
     currentImageIndex.value = index;
   }
@@ -68,47 +91,112 @@ class ProductDetailsController extends GetxController {
 
   void updateLength(String value) {
     length.value = value;
-    calculateBoxes();
+    calculateResults();
   }
 
   void updateWidth(String value) {
     width.value = value;
-    calculateBoxes();
+    calculateResults();
   }
 
   void updateUnit(String value) {
     selectedUnit.value = value;
-    calculateBoxes();
+    calculateResults();
   }
 
-  void calculateBoxes() {
-    if (length.value.isEmpty || width.value.isEmpty) {
-      calculatedBoxes.value = 0;
+  void updateSelectedWidth(SheetWidth? width) {
+    selectedWidth.value = width;
+    calculateResults();
+  }
+
+  void calculateResults() {
+    final config = product.calculatorConfig;
+
+    if (config.calculatorType == CalculatorType.disabled) {
+      _resetCalculation();
       return;
     }
 
     final lengthValue = double.tryParse(length.value);
-    final widthValue = double.tryParse(width.value);
-
-    if (lengthValue == null || widthValue == null) {
-      calculatedBoxes.value = 0;
+    if (lengthValue == null || lengthValue <= 0) {
+      _resetCalculation();
       return;
     }
 
-    // Calculate area in square meters (assuming product size is 4x4 = 16 sq.m per box)
-    double areaInSqM = lengthValue * widthValue;
+    double roomArea = 0.0;
 
-    // Convert to square meters if needed
-    if (selectedUnit.value == 'Sqr. ft.') {
-      areaInSqM = areaInSqM * 0.092903; // Convert sq ft to sq m
+    switch (config.productType) {
+      case ProductType.boxBased:
+        final widthValue = double.tryParse(width.value);
+        if (widthValue == null || widthValue <= 0) {
+          _resetCalculation();
+          return;
+        }
+
+        // 1️⃣ Area
+        roomArea = lengthValue * widthValue;
+
+        if (selectedUnit.value == 'Sqr. ft.') {
+          roomArea *= 0.092903;
+        }
+
+        // 2️⃣ Waste
+        final wasteFactor = 1 + (config.wastePercentage / 100);
+        final areaWithWaste = roomArea * wasteFactor;
+
+        // 3️⃣ Box coverage (MUST exist)
+        final coveragePerBox = config.coveragePerBox;
+        if (coveragePerBox == null || coveragePerBox <= 0) {
+          _resetCalculation();
+          return;
+        }
+
+        // 4️⃣ Box calculation
+        final exactBoxes = areaWithWaste / coveragePerBox;
+        final boxesNeeded = exactBoxes.ceil();
+
+        // 5️⃣ Store result
+        calculatedArea.value = areaWithWaste;
+        calculatedBoxes.value = boxesNeeded;
+
+        calculationResult.value =
+            'Room: ${roomArea.toStringAsFixed(1)} m²\n'
+            'With ${config.wastePercentage.toInt()}% waste: ${areaWithWaste.toStringAsFixed(1)} m²\n'
+            'Boxes needed: $boxesNeeded (${exactBoxes.toStringAsFixed(2)} calculated)';
+        break;
+
+      case ProductType.carpet:
+      case ProductType.vinyl:
+        if (selectedWidth.value == null) {
+          _resetCalculation();
+          return;
+        }
+
+        final sheetWidth = selectedWidth.value!.width;
+        double area = lengthValue * sheetWidth;
+
+        if (selectedUnit.value == 'Sqr. ft.') {
+          area *= 0.092903;
+        }
+
+        final areaWithWaste = area * (1 + config.wastePercentage / 100);
+
+        calculatedArea.value = areaWithWaste;
+
+        calculationResult.value =
+            'You need ${lengthValue.toStringAsFixed(1)}m × ${sheetWidth}m\n'
+            'Total with waste: ${areaWithWaste.toStringAsFixed(1)} m²';
+        break;
+
+      default:
+        _resetCalculation();
     }
+  }
 
-    // Calculate number of boxes (assuming each box covers 16 sq.m)
-    final boxesNeeded = (areaInSqM / 16).ceil();
-    calculatedBoxes.value = boxesNeeded;
-
-    // Calculate quantity of pieces (assuming 20 pcs per calculation as shown in design)
-    // This is derived from the area calculation
+  void _resetCalculation() {
+    calculatedArea.value = 0.0;
+    calculatedBoxes.value = 0;
+    calculationResult.value = '';
   }
 
   void addToCart() {

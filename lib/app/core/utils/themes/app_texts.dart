@@ -1,111 +1,124 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
+// import 'package:google_fonts/google_fonts.dart';
 
 class AppTextsTheme {
+  // Get text style with system font (temporary fix for blank text issue)
+  static TextStyle _textStyle({
+    required double fontSize,
+    FontWeight fontWeight = FontWeight.w400,
+    double letterSpacing = 0.0,
+  }) {
+    return TextStyle(
+      fontSize: fontSize,
+      fontWeight: fontWeight,
+      letterSpacing: letterSpacing,
+      fontFamily: null, // Use system default font
+    );
+  }
+
   // Display text styles - largest text
-  static TextStyle displayLarge = GoogleFonts.oswald(
+  static TextStyle displayLarge = _textStyle(
     fontSize: 57.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: -0.25,
   );
 
-  static TextStyle displayMedium = GoogleFonts.oswald(
+  static TextStyle displayMedium = _textStyle(
     fontSize: 45.sp,
     fontWeight: FontWeight.w400,
   );
 
-  static TextStyle displaySmall = GoogleFonts.oswald(
+  static TextStyle displaySmall = _textStyle(
     fontSize: 36.sp,
     fontWeight: FontWeight.w400,
   );
 
   // Headline text styles
-  static TextStyle headlineLarge = GoogleFonts.oswald(
+  static TextStyle headlineLarge = _textStyle(
     fontSize: 32.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle headlineMedium = GoogleFonts.oswald(
+  static TextStyle headlineMedium = _textStyle(
     fontSize: 28.sp,
     fontWeight: FontWeight.w600,
   );
 
-  static TextStyle headlineSmall = GoogleFonts.oswald(
+  static TextStyle headlineSmall = _textStyle(
     fontSize: 24.sp,
     fontWeight: FontWeight.w600,
   );
 
   // Title text styles
-  static TextStyle titleLarge = GoogleFonts.oswald(
+  static TextStyle titleLarge = _textStyle(
     fontSize: 22.sp,
     fontWeight: FontWeight.w500,
   );
 
-  static TextStyle titleMedium = GoogleFonts.oswald(
+  static TextStyle titleMedium = _textStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.15,
   );
-
-  static TextStyle titleSmall = GoogleFonts.oswald(
+  static TextStyle titleSmall = _textStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
   // Body text styles - most common text
-  static TextStyle bodyLarge = GoogleFonts.oswald(
+  static TextStyle bodyLarge = _textStyle(
     fontSize: 16.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.5,
   );
 
-  static TextStyle bodyMedium = GoogleFonts.oswald(
+  static TextStyle bodyMedium = _textStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.25,
   );
 
-  static TextStyle bodySmall = GoogleFonts.oswald(
+  static TextStyle bodySmall = _textStyle(
     fontSize: 12.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
   );
 
   // Label text styles - buttons, tabs, etc.
-  static TextStyle labelLarge = GoogleFonts.oswald(
+  static TextStyle labelLarge = _textStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.1,
   );
 
-  static TextStyle labelMedium = GoogleFonts.oswald(
+  static TextStyle labelMedium = _textStyle(
     fontSize: 12.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   );
 
-  static TextStyle labelSmall = GoogleFonts.oswald(
+  static TextStyle labelSmall = _textStyle(
     fontSize: 11.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 0.5,
   );
 
   // Custom text styles for specific use cases
-  static TextStyle button = GoogleFonts.oswald(
+  static TextStyle button = _textStyle(
     fontSize: 14.sp,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.5,
   );
 
-  static TextStyle caption = GoogleFonts.oswald(
+  static TextStyle caption = _textStyle(
     fontSize: 12.sp,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.4,
   );
 
-  static TextStyle overline = GoogleFonts.oswald(
+  static TextStyle overline = _textStyle(
     fontSize: 10.sp,
     fontWeight: FontWeight.w500,
     letterSpacing: 1.5,

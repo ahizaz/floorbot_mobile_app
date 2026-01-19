@@ -6,6 +6,7 @@ class ExpandableSection extends StatelessWidget {
   final bool isExpanded;
   final VoidCallback onTap;
   final Widget? expandedContent;
+  final bool isCalculator;
 
   const ExpandableSection({
     super.key,
@@ -13,6 +14,7 @@ class ExpandableSection extends StatelessWidget {
     required this.isExpanded,
     required this.onTap,
     this.expandedContent,
+    this.isCalculator = false,
   });
 
   @override

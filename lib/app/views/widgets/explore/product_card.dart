@@ -79,59 +79,88 @@ class ProductCard extends StatelessWidget {
               ),
             ),
 
-            Padding(
-              padding: EdgeInsets.all(12.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
+            // Content section - use Expanded to prevent overflow
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.all(8.w), // Reduced padding
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Top section - product info
+                    Expanded(
+                      flex: 3,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              fontSize: 13.sp, // Reduced font size
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                              height: 1.2, // Reduced line height
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 1.h), // Reduced spacing
+                          Text(
+                            subtitle,
+                            style: TextStyle(
+                              fontSize: 10.sp, // Reduced font size
+                              color: Colors.grey[600],
+                              height: 1.2, // Reduced line height
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    subtitle,
-                    style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  SizedBox(height: 8.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        price,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: onAddTap,
-                        child: Container(
-                          width: 28.w,
-                          height: 28.w,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            shape: BoxShape.circle,
+
+                    // Bottom section - price and add button
+                    SizedBox(
+                      height: 24.h, // Fixed height for bottom section
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              price,
+                              style: TextStyle(
+                                fontSize: 12.sp, // Reduced font size
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                height: 1.2, // Reduced line height
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.add,
-                            color: Colors.white,
-                            size: 18.sp,
+                          GestureDetector(
+                            onTap: onAddTap,
+                            child: Container(
+                              width: 24.w, // Reduced size
+                              height: 24.w,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.add,
+                                color: Colors.white,
+                                size: 14.sp, // Reduced icon size
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],

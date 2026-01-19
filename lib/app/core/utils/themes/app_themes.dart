@@ -22,10 +22,10 @@ class AppThemes {
         onSurface: AppColors.textColor,
         onError: Colors.white,
       ),
-      // textTheme: AppTextsTheme.textTheme().apply(
-      //   bodyColor: AppColors.textColor,
-      //   displayColor: AppColors.textColor,
-      // ),
+      textTheme: AppTextsTheme.textTheme().apply(
+        bodyColor: AppColors.textColor,
+        displayColor: AppColors.textColor,
+      ),
 
       // AppBar Theme
       appBarTheme: AppBarTheme(
@@ -58,14 +58,14 @@ class AppThemes {
           borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: AppColors.borderColor, width: 1),
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(color: AppColors.borderColor, width: 1),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12.r),
-          borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
-        ),
+        // enabledBorder: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(12.r),
+        //   borderSide: const BorderSide(color: AppColors.borderColor, width: 1),
+        // ),
+        // focusedBorder: OutlineInputBorder(
+        //   borderRadius: BorderRadius.circular(12.r),
+        //   borderSide: const BorderSide(color: AppColors.primaryColor, width: 2),
+        // ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12.r),
           borderSide: const BorderSide(color: AppColors.errorColor, width: 1),

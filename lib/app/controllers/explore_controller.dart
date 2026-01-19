@@ -1,7 +1,10 @@
-import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
-import 'package:get/get.dart';
-import 'package:floor_bot_mobile/app/models/product.dart';
+import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/app_images.dart';
+import 'package:floor_bot_mobile/app/models/product.dart';
+import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
+import 'package:floor_bot_mobile/app/views/screens/category/category_products_screen.dart';
+import 'package:get/get.dart';
 
 class ExploreController extends GetxController {
   // Observable lists
@@ -35,6 +38,9 @@ class ExploreController extends GetxController {
         price: 39.00,
         imageAsset: AppImages.solidWood,
         category: 'Wood Floor',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 28.0, // 4x7 coverage per box
+        ),
       ),
       Product(
         id: '2',
@@ -43,6 +49,9 @@ class ExploreController extends GetxController {
         price: 39.00,
         imageAsset: AppImages.parquet,
         category: 'Wood Floor',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 16.0, // 4x4 coverage per box
+        ),
       ),
       Product(
         id: '3',
@@ -51,6 +60,9 @@ class ExploreController extends GetxController {
         price: 39.00,
         imageAsset: AppImages.ceramic,
         category: 'Laminate',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 15.0, // 3x5 coverage per box
+        ),
       ),
       Product(
         id: '4',
@@ -59,6 +71,9 @@ class ExploreController extends GetxController {
         price: 45.00,
         imageAsset: AppImages.beige,
         category: 'Wood Floor',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 35.0, // 5x7 coverage per box
+        ),
       ),
     ];
   }
@@ -72,6 +87,9 @@ class ExploreController extends GetxController {
         price: 39.00,
         imageAsset: AppImages.solidWood,
         category: 'Wood Floor',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 40.0, // 5x8 coverage per box
+        ),
       ),
       Product(
         id: '6',
@@ -80,6 +98,9 @@ class ExploreController extends GetxController {
         price: 24.99,
         imageAsset: AppImages.parquet2,
         category: 'Wood Floor',
+        calculatorConfig: ProductCalculatorConfig.boxBased(
+          coveragePerBox: 9.0, // 3x3 coverage per box
+        ),
       ),
       Product(
         id: '7',
@@ -88,17 +109,48 @@ class ExploreController extends GetxController {
         price: 29.99,
         imageAsset: AppImages.vinyl,
         category: 'Vinyl',
+        calculatorConfig: ProductCalculatorConfig.vinyl(),
+      ),
+      Product(
+        id: '8',
+        name: 'Premium Carpet',
+        description: 'Available in 4m/5m widths',
+        price: 35.99,
+        imageAsset: AppImages.carpets,
+        category: 'Carpet',
+        calculatorConfig: ProductCalculatorConfig.carpet(),
       ),
     ];
   }
 
   // Actions
   void onCategoryTap(String categoryId) {
-    // TODO: Navigate to category details
-    Get.snackbar(
-      'Category',
-      'Opening category...',
-      snackPosition: SnackPosition.BOTTOM,
+    // Map category ID to category name
+    String categoryName;
+    switch (categoryId) {
+      case '1':
+        categoryName = 'Carpets';
+        break;
+      case '2':
+        categoryName = 'Vinyl';
+        break;
+      case '3':
+        categoryName = 'Laminate';
+        break;
+      case '4':
+        categoryName = 'Wood Floor';
+        break;
+      default:
+        categoryName = 'Products';
+    }
+
+    // Navigate to category products screen
+    Get.to(
+      () => CategoryProductsScreen(
+        categoryName: categoryName,
+        categoryId: categoryId,
+      ),
+      transition: Transition.cupertino,
     );
   }
 
@@ -140,5 +192,10 @@ class ExploreController extends GetxController {
       'Showing all best deals...',
       snackPosition: SnackPosition.BOTTOM,
     );
+  }
+
+  // Format price for display
+  String formatProductPrice(Product product) {
+    return '${Get.find<CurrencyController>().formatPrice(product.price)}/box';
   }
 }
