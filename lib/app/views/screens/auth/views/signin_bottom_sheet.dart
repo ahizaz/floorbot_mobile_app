@@ -1,45 +1,22 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_primary_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/inputs/custom_text_field.dart';
 
-class SignInBottomSheet extends StatefulWidget {
-  const SignInBottomSheet({super.key});
+class SignInBottomSheet extends StatelessWidget {
+   SignInBottomSheet({super.key});
 
-  @override
-  State<SignInBottomSheet> createState() => _SignInBottomSheetState();
-}
-
-class _SignInBottomSheetState extends State<SignInBottomSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleSignIn() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Handle sign in
-      Navigator.pop(context);
-    }
-  }
-
-  void _handleCreateAccount() {
-    Navigator.pop(context);
-    // Navigate to sign up screen
-  }
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
+    final controller = Get.put(AuthController());
 
     return Container(
       height: mediaQuery.size.height * 0.92,
@@ -105,18 +82,10 @@ class _SignInBottomSheetState extends State<SignInBottomSheet> {
                         // Email Field
                         CustomTextField(
                           hintText: 'Email',
-                          controller: _emailController,
+                          controller: controller.emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            if (!value.contains('@')) {
-                              return 'Please enter a valid email';
-                            }
-                            return null;
-                          },
+                          validator: controller.validateEmail,
                         ),
 
                         SizedBox(height: 20.h),
@@ -124,18 +93,17 @@ class _SignInBottomSheetState extends State<SignInBottomSheet> {
                         // Password Field
                         CustomTextField(
                           hintText: 'Password',
-                          controller: _passwordController,
+                          controller: controller.passwordController,
                           keyboardType: TextInputType.visiblePassword,
                           isPassword: true,
                           showPasswordToggle: true,
                           textInputAction: TextInputAction.done,
-                          onFieldSubmitted: (_) => _handleSignIn(),
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your password';
+                          onFieldSubmitted: (_) async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              await controller.signIn(validate: false);
                             }
-                            return null;
                           },
+                          validator: controller.validatePassword,
                         ),
 
                         SizedBox(height: 32.h),
@@ -143,7 +111,12 @@ class _SignInBottomSheetState extends State<SignInBottomSheet> {
                         // Sign In Button
                         CustomPrimaryButton(
                           text: 'Sign in',
-                          onPressed: _handleSignIn,
+                          onPressed: () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              await controller.signIn(validate: false);
+                            }
+                          },
+                          isLoading: controller.isLoading,
                         ),
 
                         SizedBox(height: 16.h),
@@ -152,7 +125,10 @@ class _SignInBottomSheetState extends State<SignInBottomSheet> {
                         Center(
                           child: CustomTextButton(
                             text: 'Create an account',
-                            onPressed: _handleCreateAccount,
+                            onPressed: () {
+                              controller.switchToSignUp();
+                              Navigator.pop(context);
+                            },
                             textColor: theme.colorScheme.onSurface,
                             fontSize: 16.sp,
                             fontWeight: FontWeight.w400,

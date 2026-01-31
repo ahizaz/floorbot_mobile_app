@@ -7,6 +7,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:floor_bot_mobile/app/controllers/signup_otp_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/auth/views/signup_otp_submit_view.dart';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 enum AuthMode { signIn, signUp, forgotPassword }
 
@@ -128,51 +129,98 @@ class AuthController extends GetxController {
   }
 
   // Sign in
-  Future<void> signIn({bool validate = true}) async {
-    if (validate && !validateForm()) return;
+  // Future<void> signIn({bool validate = true}) async {
+  //   if (validate && !validateForm()) return;
 
-    _isLoading.value = true;
+  //   _isLoading.value = true;
 
-    try {
-      // TODO: Implement actual sign in logic
-      await Future.delayed(const Duration(seconds: 2));
+  //   try {
+  //     // TODO: Implement actual sign in logic
+  //     await Future.delayed(const Duration(seconds: 2));
 
-      Get.snackbar(
-        'Success',
-        'Signed in successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+  //     Get.snackbar(
+  //       'Success',
+  //       'Signed in successfully!',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Get.theme.colorScheme.primary,
+  //       colorText: Colors.white,
+  //     );
 
-      // After sign up, navigate to OTP verification screen
-      final otpController = SignUpOtpController(initialEmail: emailController.text);
+  //     // After sign up, navigate to OTP verification screen
+  //     final otpController = SignUpOtpController(initialEmail: emailController.text);
 
-      // Optionally send OTP immediately (remove await if you prefer asynchronous send)
-      await otpController.sendVerificationCode(emailController.text);
+  //     // Optionally send OTP immediately (remove await if you prefer asynchronous send)
+  //     await otpController.sendVerificationCode(emailController.text);
 
-      // Close bottom sheet / current dialog if any, then navigate to OTP screen
-      // Close bottom sheet if it is open so we don't stack it under the new page
-      try {
-        Get.back();
-      } catch (_) {
-        // ignore if there's nothing to pop
+  //     // Close bottom sheet / current dialog if any, then navigate to OTP screen
+  //     // Close bottom sheet if it is open so we don't stack it under the new page
+  //     try {
+  //       Get.back();
+  //     } catch (_) {
+  //       // ignore if there's nothing to pop
+  //     }
+
+  //     // Navigate to OTP screen (user can go back if needed)
+  //     Get.to(() => SignUpOtp(controller: otpController));
+
+  //     clearForm();
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error',
+  //       'Failed to sign in: ${e.toString()}',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     _isLoading.value = false;
+  //   }
+  // }
+  Future<void>signIn({bool validate =true})async{
+    if(validate && !validateForm())return;
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+    try{
+      EasyLoading.show(status: 'please wait....');
+      final body = jsonEncode({
+        'username':email,
+        'password':password,
+      });
+      debugPrint('AuthController.signIn URL : ${Urls.signIn}');
+      debugPrint('AuthController.singnIn body :$body');
+      final resp = await http.post(Uri.parse(Urls.signIn),
+      headers: {'Content-Type':'application/json'},
+      body: body,
+      ).timeout(const Duration(seconds: 30));
+      debugPrint('AuthController.signIN status : ${resp.statusCode}');
+      debugPrint('AuthController.singIn resp :${resp.body}');
+      EasyLoading.dismiss();
+      if(resp.statusCode==200 || resp.statusCode==201){
+        final parsed = jsonDecode(resp.body);
+        final success = parsed['success']==true;
+        if(success){
+          final token = parsed['access']??parsed['token']??'';
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('access', token);
+             EasyLoading.showSuccess(parsed['message'] ?? 'Login successful!');
+              clearForm();
+              Get.offAll(() => const AppNavView());
+                return;
+
+
+        }
       }
-
-      // Navigate to OTP screen (user can go back if needed)
-      Get.to(() => SignUpOtp(controller: otpController));
-
-      clearForm();
-    } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to sign in: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      _isLoading.value = false;
+      String message = resp.body;
+      try{
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message']??parsed['error']??resp.body;
+      }catch (_) {}
+       EasyLoading.showError(message);
+    }
+    catch (e) {
+      EasyLoading.dismiss();
+      debugPrint('AuthController.signIn error: $e');
+      EasyLoading.showError('Failed to sign in: ${e.toString()}');
     }
   }
 
