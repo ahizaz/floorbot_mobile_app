@@ -32,7 +32,7 @@ class ForgotPasswordVerifyCodeView extends StatelessWidget {
 
         // Subtitle
         Text(
-          'We\'ve sent a 4-digit verification code to ${controller.emailController.text}. Please enter it below.',
+          'We\'ve sent a 6-digit verification code to ${controller.emailController.text}. Please enter it below.',
           style: theme.textTheme.bodyMedium?.copyWith(
             color: theme.colorScheme.onSurface.withOpacity(0.7),
             height: 1.5,
@@ -43,9 +43,9 @@ class ForgotPasswordVerifyCodeView extends StatelessWidget {
 
         // PIN Input Field
         PinInputField(
-          pinLength: 4,
+          pinLength: 6,
           onCompleted: (pin) {
-            // Automatically verify when all 4 digits are entered
+            // Automatically verify when all 6 digits are entered
             controller.verificationCodeController.text = pin;
           },
           onChanged: (pin) {

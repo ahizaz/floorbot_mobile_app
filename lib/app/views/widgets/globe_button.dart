@@ -1,6 +1,5 @@
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_texts.dart';
-import 'package:floor_bot_mobile/app/core/utils/themes/app_themes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 

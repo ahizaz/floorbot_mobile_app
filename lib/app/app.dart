@@ -3,6 +3,7 @@ import 'package:floor_bot_mobile/app/core/utils/themes/app_themes.dart';
 import 'package:floor_bot_mobile/app/views/screens/initial_view/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class MyApp extends StatelessWidget {
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
           darkTheme: AppThemes.darkTheme(),
           themeMode: ThemeMode.system,
           home: const WelcomeScreen(),
+          builder: EasyLoading.init(),
         );
       },
     );

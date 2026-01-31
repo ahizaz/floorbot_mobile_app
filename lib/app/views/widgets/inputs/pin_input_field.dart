@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -55,6 +57,7 @@ class _PinInputFieldState extends State<PinInputField> {
     }
   }
 
+
   @override
   void dispose() {
     for (var controller in _controllers) {
@@ -102,73 +105,90 @@ class _PinInputFieldState extends State<PinInputField> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final boxSize = widget.boxSize ?? 60.w;
+    final defaultBoxSize = widget.boxSize ?? 60.w;
     final borderRadius = widget.borderRadius ?? 12.r;
     final borderWidth = widget.borderWidth ?? 2.0;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final spacing = 8.w;
+        double boxSize = defaultBoxSize;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(widget.pinLength, (index) {
-        return SizedBox(
-          width: boxSize,
-          height: boxSize,
-          child: TextFormField(
-            controller: _controllers[index],
-            focusNode: _focusNodes[index],
-            textAlign: TextAlign.center,
-            obscureText: widget.obscureText,
-            keyboardType: TextInputType.number,
-            maxLength: 1,
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: widget.textColor ?? theme.colorScheme.onSurface,
-              fontWeight: FontWeight.w600,
-              fontSize: 24.sp,
-            ),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
-              counterText: '',
-              filled: true,
-              fillColor: widget.fillColor ?? theme.colorScheme.surface,
-              contentPadding: EdgeInsets.zero,
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(
-                  color:
-                      widget.inactiveBorderColor ??
-                      theme.colorScheme.outline.withOpacity(0.3),
-                  width: borderWidth,
+        final parentWidth = constraints.maxWidth.isFinite
+            ? constraints.maxWidth
+            : MediaQuery.of(context).size.width - 32.w;
+        final available = parentWidth - (widget.pinLength - 1) * spacing;
+        final maxPossible = available / widget.pinLength;
+        boxSize = min(defaultBoxSize, maxPossible);
+
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List.generate(widget.pinLength * 2 - 1, (i) {
+            if (i.isOdd) return SizedBox(width: spacing);
+            final index = i ~/ 2;
+            return SizedBox(
+              width: boxSize,
+              height: boxSize,
+              child: TextFormField(
+                controller: _controllers[index],
+                focusNode: _focusNodes[index],
+                textAlign: TextAlign.center,
+                obscureText: widget.obscureText,
+                keyboardType: TextInputType.number,
+                maxLength: 1,
+                style: theme.textTheme.headlineSmall?.copyWith(
+                  color: widget.textColor ?? theme.colorScheme.onSurface,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 24.sp,
                 ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(
-                  color: widget.activeBorderColor ?? theme.colorScheme.primary,
-                  width: borderWidth,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  counterText: '',
+                  filled: true,
+                  fillColor: widget.fillColor ?? theme.colorScheme.surface,
+                  contentPadding: EdgeInsets.zero,
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: BorderSide(
+                      color: widget.inactiveBorderColor ??
+                          theme.colorScheme.outline.withOpacity(0.3),
+                      width: borderWidth,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: BorderSide(
+                      color: widget.activeBorderColor ??
+                          theme.colorScheme.primary,
+                      width: borderWidth,
+                    ),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.error,
+                      width: borderWidth,
+                    ),
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    borderSide: BorderSide(
+                      color: theme.colorScheme.error,
+                      width: borderWidth,
+                    ),
+                  ),
                 ),
+                onChanged: (value) {
+                  if (value.isEmpty) {
+                    _onBackspace(index);
+                  }
+                },
               ),
-              errorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.error,
-                  width: borderWidth,
-                ),
-              ),
-              focusedErrorBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(borderRadius),
-                borderSide: BorderSide(
-                  color: theme.colorScheme.error,
-                  width: borderWidth,
-                ),
-              ),
-            ),
-            onChanged: (value) {
-              if (value.isEmpty) {
-                _onBackspace(index);
-              }
-            },
-          ),
+            );
+          }),
         );
-      }),
+      },
     );
   }
+
 }
+  

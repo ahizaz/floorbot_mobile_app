@@ -274,7 +274,6 @@ class CategoryProductsScreen extends StatelessWidget {
   }
 
   void _showSortOptions() {
-    final controller = Get.find<CategoryProductsController>();
     Get.bottomSheet(
       Container(
         padding: EdgeInsets.all(20.w),

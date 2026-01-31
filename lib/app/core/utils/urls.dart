@@ -1,0 +1,4 @@
+class Urls{
+  static const String baseUrl = "http://10.10.12.15:8089/api/v1";
+
+}
