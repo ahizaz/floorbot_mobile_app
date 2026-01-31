@@ -1,45 +1,37 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'package:get/get.dart';
+import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
+
+
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_primary_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/inputs/custom_text_field.dart';
 
-class SignUpBottomSheet extends StatefulWidget {
+class SignUpBottomSheet extends StatelessWidget {
   const SignUpBottomSheet({super.key});
 
   @override
-  State<SignUpBottomSheet> createState() => _SignUpBottomSheetState();
-}
+  Widget build(BuildContext context) {
+    final _formKey = GlobalKey<FormState>();
+    final auth = Get.find<AuthController>();
 
-class _SignUpBottomSheetState extends State<SignUpBottomSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
+    Future<void> _handleContinue() async {
+      debugPrint('Continue pressed');
+      final isValid = _formKey.currentState?.validate() ?? false;
+      debugPrint('Form valid: $isValid');
+      if (!isValid) return;
 
-  @override
-  void dispose() {
-    _fullNameController.dispose();
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  void _handleContinue() {
-    if (_formKey.currentState?.validate() ?? false) {
-      // Handle sign up
-      Navigator.pop(context);
+      await auth.signUp(validate: false);
     }
-  }
 
   void _handleSignIn() {
     Navigator.pop(context);
     // Navigate to sign in screen
   }
 
-  @override
-  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final mediaQuery = MediaQuery.of(context);
 
@@ -107,7 +99,7 @@ class _SignUpBottomSheetState extends State<SignUpBottomSheet> {
                         // Full Name Field
                         CustomTextField(
                           hintText: 'Full Name',
-                          controller: _fullNameController,
+                          controller: auth.fullNameController,
                           keyboardType: TextInputType.name,
                           textInputAction: TextInputAction.next,
                           validator: (value) {
@@ -123,7 +115,7 @@ class _SignUpBottomSheetState extends State<SignUpBottomSheet> {
                         // Email Field
                         CustomTextField(
                           hintText: 'Email',
-                          controller: _emailController,
+                          controller: auth.emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           validator: (value) {
@@ -142,7 +134,7 @@ class _SignUpBottomSheetState extends State<SignUpBottomSheet> {
                         // Password Field
                         CustomTextField(
                           hintText: 'Password',
-                          controller: _passwordController,
+                          controller: auth.passwordController,
                           keyboardType: TextInputType.visiblePassword,
                           isPassword: true,
                           showPasswordToggle: true,

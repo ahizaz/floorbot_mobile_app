@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/bottom_nav/app_nav_view.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:floor_bot_mobile/app/controllers/signup_otp_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/auth/views/signup_otp_submit_view.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 
 enum AuthMode { signIn, signUp, forgotPassword }
 
@@ -178,55 +182,91 @@ class AuthController extends GetxController {
 
     _isLoading.value = true;
 
+    final fullName = fullNameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text;
+
     try {
-      // TODO: Implement actual sign up logic
-      await Future.delayed(const Duration(seconds: 2));
+      EasyLoading.show(status: 'Please wait...');
 
-      Get.snackbar(
-        'Success',
-        'Account created successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+      final body = jsonEncode({
+        'username': email,
+        'full_name': fullName,
+        'email': email,
+        'password': password,
+      });
 
-      // Navigate to OTP verification screen instead of dashboard
-      final otpController = SignUpOtpController(initialEmail: emailController.text);
+      debugPrint('AuthController.signUp URL: ${Urls.signUp}');
+      debugPrint('AuthController.signUp body: $body');
 
-      // Optionally send OTP immediately
-      await otpController.sendVerificationCode(emailController.text);
+      final resp = await http
+          .post(Uri.parse(Urls.signUp), headers: {
+        'Content-Type': 'application/json'
+      }, body: body)
+          .timeout(const Duration(seconds: 30));
 
-      // Close bottom sheet if open
-      try {
-        Get.back();
-      } catch (_) {}
+      debugPrint('AuthController.signUp status: ${resp.statusCode}');
+      debugPrint('AuthController.signUp resp: ${resp.body}');
 
-      // Show OTP screen as a bottom sheet (match AuthBottomSheet style)
-      Get.bottomSheet(
-        Container(
-          height: Get.height * 0.92,
-          decoration: BoxDecoration(
-            color: Get.theme.scaffoldBackgroundColor,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            resizeToAvoidBottomInset: true,
-            body: SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                keyboardDismissBehavior:
-                    ScrollViewKeyboardDismissBehavior.onDrag,
-                child: SignUpOtp(controller: otpController),
+      EasyLoading.dismiss();
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        Get.snackbar(
+          'Success',
+          'Account created successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Colors.white,
+        );
+
+        final otpController = SignUpOtpController(initialEmail: email);
+        await otpController.sendVerificationCode(email);
+
+        try {
+          Get.back();
+        } catch (_) {}
+
+        Get.bottomSheet(
+          Container(
+            height: Get.height * 0.92,
+            decoration: BoxDecoration(
+              color: Get.theme.scaffoldBackgroundColor,
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Scaffold(
+              backgroundColor: Colors.transparent,
+              resizeToAvoidBottomInset: true,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  keyboardDismissBehavior:
+                      ScrollViewKeyboardDismissBehavior.onDrag,
+                  child: SignUpOtp(controller: otpController),
+                ),
               ),
             ),
           ),
-        ),
-        isScrollControlled: true,
-      );
+          isScrollControlled: true,
+        );
 
-      clearForm();
+        clearForm();
+      } else {
+        String message = resp.body;
+        try {
+          final parsed = jsonDecode(resp.body);
+          message = parsed['message'] ?? parsed['error'] ?? resp.body;
+        } catch (_) {}
+
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
     } catch (e) {
+      EasyLoading.dismiss();
       Get.snackbar(
         'Error',
         'Failed to create account: ${e.toString()}',
