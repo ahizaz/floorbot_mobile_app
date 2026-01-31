@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/bottom_nav/app_nav_view.dart';
+import 'package:floor_bot_mobile/app/controllers/signup_otp_controller.dart';
+import 'package:floor_bot_mobile/app/views/screens/auth/views/signup_otp_submit_view.dart';
 
 enum AuthMode { signIn, signUp, forgotPassword }
 
@@ -24,8 +26,6 @@ class AuthController extends GetxController {
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // Form key
-  final formKey = GlobalKey<FormState>();
 
   // Loading state
   final RxBool _isLoading = false.obs;
@@ -106,7 +106,6 @@ class AuthController extends GetxController {
     fullNameController.clear();
     emailController.clear();
     passwordController.clear();
-    formKey.currentState?.reset();
   }
 
   // Clear forgot password form
@@ -119,12 +118,14 @@ class AuthController extends GetxController {
 
   // Validate form
   bool validateForm() {
-    return formKey.currentState?.validate() ?? false;
+    // Validation is handled by the active form widget.
+    // Keep this method for backward compatibility and default to true.
+    return true;
   }
 
   // Sign in
-  Future<void> signIn() async {
-    if (!validateForm()) return;
+  Future<void> signIn({bool validate = true}) async {
+    if (validate && !validateForm()) return;
 
     _isLoading.value = true;
 
@@ -140,8 +141,23 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
 
-      // Navigate to dashboard with bottom navigation
-      Get.offAll(() => const AppNavView());
+      // After sign up, navigate to OTP verification screen
+      final otpController = SignUpOtpController(initialEmail: emailController.text);
+
+      // Optionally send OTP immediately (remove await if you prefer asynchronous send)
+      await otpController.sendVerificationCode(emailController.text);
+
+      // Close bottom sheet / current dialog if any, then navigate to OTP screen
+      // Close bottom sheet if it is open so we don't stack it under the new page
+      try {
+        Get.back();
+      } catch (_) {
+        // ignore if there's nothing to pop
+      }
+
+      // Navigate to OTP screen (user can go back if needed)
+      Get.to(() => SignUpOtp(controller: otpController));
+
       clearForm();
     } catch (e) {
       Get.snackbar(
@@ -157,8 +173,8 @@ class AuthController extends GetxController {
   }
 
   // Sign up
-  Future<void> signUp() async {
-    if (!validateForm()) return;
+  Future<void> signUp({bool validate = true}) async {
+    if (validate && !validateForm()) return;
 
     _isLoading.value = true;
 
@@ -174,8 +190,41 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
 
-      // Navigate to dashboard with bottom navigation
-      Get.offAll(() => const AppNavView());
+      // Navigate to OTP verification screen instead of dashboard
+      final otpController = SignUpOtpController(initialEmail: emailController.text);
+
+      // Optionally send OTP immediately
+      await otpController.sendVerificationCode(emailController.text);
+
+      // Close bottom sheet if open
+      try {
+        Get.back();
+      } catch (_) {}
+
+      // Show OTP screen as a bottom sheet (match AuthBottomSheet style)
+      Get.bottomSheet(
+        Container(
+          height: Get.height * 0.92,
+          decoration: BoxDecoration(
+            color: Get.theme.scaffoldBackgroundColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Scaffold(
+            backgroundColor: Colors.transparent,
+            resizeToAvoidBottomInset: true,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: SignUpOtp(controller: otpController),
+              ),
+            ),
+          ),
+        ),
+        isScrollControlled: true,
+      );
+
       clearForm();
     } catch (e) {
       Get.snackbar(

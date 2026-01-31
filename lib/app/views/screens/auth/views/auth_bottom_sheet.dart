@@ -8,10 +8,31 @@ import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.da
 import 'package:floor_bot_mobile/app/views/widgets/inputs/custom_text_field.dart';
 import 'package:floor_bot_mobile/app/views/screens/auth/views/forgot_password_view.dart';
 
-class AuthBottomSheet extends StatelessWidget {
+class AuthBottomSheet extends StatefulWidget {
   final AuthMode initialMode;
 
   const AuthBottomSheet({super.key, this.initialMode = AuthMode.signIn});
+
+  @override
+  State<AuthBottomSheet> createState() => _AuthBottomSheetState();
+}
+
+class _AuthBottomSheetState extends State<AuthBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Set initial mode after first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final controller = Get.put(AuthController());
+      if (widget.initialMode == AuthMode.signIn) {
+        controller.switchToSignIn();
+      } else {
+        controller.switchToSignUp();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +41,6 @@ class AuthBottomSheet extends StatelessWidget {
 
     // Get or create controller
     final controller = Get.put(AuthController());
-
-    // Set initial mode
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (initialMode == AuthMode.signIn) {
-        controller.switchToSignIn();
-      } else {
-        controller.switchToSignUp();
-      }
-    });
 
     return Container(
       height: mediaQuery.size.height * 0.92,
@@ -90,7 +102,7 @@ class AuthBottomSheet extends StatelessWidget {
                     final isSignIn = controller.authMode == AuthMode.signIn;
 
                     return Form(
-                      key: controller.formKey,
+                      key: _formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -143,9 +155,13 @@ class AuthBottomSheet extends StatelessWidget {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) {
                               if (isSignIn) {
-                                controller.signIn();
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  controller.signIn(validate: false);
+                                }
                               } else {
-                                controller.signUp();
+                                if (_formKey.currentState?.validate() ?? false) {
+                                  controller.signUp(validate: false);
+                                }
                               }
                             },
                             validator: controller.validatePassword,
@@ -183,9 +199,15 @@ class AuthBottomSheet extends StatelessWidget {
                           // Primary Action Button
                           CustomPrimaryButton(
                             text: isSignIn ? 'Sign in' : 'Continue',
-                            onPressed: isSignIn
-                                ? controller.signIn
-                                : controller.signUp,
+                            onPressed: () async {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                if (isSignIn) {
+                                  await controller.signIn(validate: false);
+                                } else {
+                                  await controller.signUp(validate: false);
+                                }
+                              }
+                            },
                             isLoading: controller.isLoading,
                           ),
 
