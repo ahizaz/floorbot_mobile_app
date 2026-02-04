@@ -189,7 +189,7 @@ class ProductsDetails extends StatelessWidget {
                             isExpanded: controller.isDetailsExpanded.value,
                             onTap: controller.toggleDetails,
                             expandedContent: Text(
-                              'High-quality ${product.name.toLowerCase()} flooring. Perfect for residential and commercial spaces. Durable and easy to maintain.',
+                              product.description,
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 color: Colors.grey[700],

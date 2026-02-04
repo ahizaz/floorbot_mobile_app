@@ -31,12 +31,8 @@ class Product {
     // Use sale price if available and not 0, otherwise use regular price
     final price = (salePrice > 0) ? salePrice : regularPrice;
     
-    // Create description from length x width
-    final length = json['length']?.toString() ?? '';
-    final width = json['width']?.toString() ?? '';
-    final description = (length.isNotEmpty && width.isNotEmpty) 
-        ? '$length x $width cm' 
-        : 'No dimensions';
+    // Get item description from API
+    final description = json['item_description']?.toString() ?? 'No description available';
     
     return Product(
       id: json['id'].toString(),
