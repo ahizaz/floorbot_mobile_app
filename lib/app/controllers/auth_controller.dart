@@ -31,6 +31,8 @@ class AuthController extends GetxController {
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
+  // Forgot password token
+  String? _forgotPasswordToken;
 
   // Loading state
   final RxBool _isLoading = false.obs;
@@ -128,54 +130,7 @@ class AuthController extends GetxController {
     return true;
   }
 
-  // Sign in
-  // Future<void> signIn({bool validate = true}) async {
-  //   if (validate && !validateForm()) return;
-
-  //   _isLoading.value = true;
-
-  //   try {
-  //     // TODO: Implement actual sign in logic
-  //     await Future.delayed(const Duration(seconds: 2));
-
-  //     Get.snackbar(
-  //       'Success',
-  //       'Signed in successfully!',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //       backgroundColor: Get.theme.colorScheme.primary,
-  //       colorText: Colors.white,
-  //     );
-
-  //     // After sign up, navigate to OTP verification screen
-  //     final otpController = SignUpOtpController(initialEmail: emailController.text);
-
-  //     // Optionally send OTP immediately (remove await if you prefer asynchronous send)
-  //     await otpController.sendVerificationCode(emailController.text);
-
-  //     // Close bottom sheet / current dialog if any, then navigate to OTP screen
-  //     // Close bottom sheet if it is open so we don't stack it under the new page
-  //     try {
-  //       Get.back();
-  //     } catch (_) {
-  //       // ignore if there's nothing to pop
-  //     }
-
-  //     // Navigate to OTP screen (user can go back if needed)
-  //     Get.to(() => SignUpOtp(controller: otpController));
-
-  //     clearForm();
-  //   } catch (e) {
-  //     Get.snackbar(
-  //       'Error',
-  //       'Failed to sign in: ${e.toString()}',
-  //       snackPosition: SnackPosition.BOTTOM,
-  //       backgroundColor: Colors.red,
-  //       colorText: Colors.white,
-  //     );
-  //   } finally {
-  //     _isLoading.value = false;
-  //   }
-  // }
+  
   Future<void>signIn({bool validate =true})async{
     if(validate && !validateForm())return;
     final email = emailController.text.trim();
@@ -421,27 +376,49 @@ class AuthController extends GetxController {
     _isLoading.value = true;
 
     try {
-      // TODO: Implement actual email verification code sending
-      await Future.delayed(const Duration(seconds: 2));
+      EasyLoading.show(status: 'Please wait...');
 
-      Get.snackbar(
-        'Success',
-        'Verification code sent to $email',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+      final body = jsonEncode({
+        'email': email,
+      });
 
-      // Navigate to verify code screen
-      goToVerifyCode();
+      debugPrint('AuthController.sendVerificationCode URL: ${Urls.forgetPassword}');
+      debugPrint('AuthController.sendVerificationCode body: $body');
+
+      final resp = await http.post(
+        Uri.parse(Urls.forgetPassword),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      ).timeout(const Duration(seconds: 30));
+
+      debugPrint('AuthController.sendVerificationCode status: ${resp.statusCode}');
+      debugPrint('AuthController.sendVerificationCode resp: ${resp.body}');
+
+      EasyLoading.dismiss();
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final parsed = jsonDecode(resp.body);
+        final success = parsed['success'] == true;
+
+        if (success) {
+          EasyLoading.showSuccess(parsed['message'] ?? 'Verification code sent to $email');
+          // Navigate to verify code screen
+          goToVerifyCode();
+          return;
+        }
+      }
+
+      String message = resp.body;
+      try {
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message'] ?? parsed['error'] ?? resp.body;
+      } catch (_) {}
+
+      EasyLoading.showError(message);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to send verification code: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      EasyLoading.dismiss();
+      debugPrint('AuthController.sendVerificationCode error: $e');
+      EasyLoading.showError('Failed to send verification code: ${e.toString()}');
     } finally {
       _isLoading.value = false;
     }
@@ -463,41 +440,55 @@ class AuthController extends GetxController {
     _isLoading.value = true;
 
     try {
-      // TODO: Implement actual code verification
-      await Future.delayed(const Duration(seconds: 2));
+      EasyLoading.show(status: 'Please wait...');
 
-      // Mock validation - in real app, verify with backend
-      if (code.length < 4) {
-        Get.snackbar(
-          'Error',
-          'Invalid verification code',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        return false;
+      final email = emailController.text.trim();
+      final body = jsonEncode({
+        'otp': code,
+      });
+
+      debugPrint('AuthController.verifyCode URL: ${Urls.forgetPasswordOtp(email)}');
+      debugPrint('AuthController.verifyCode body: $body');
+
+      final resp = await http.post(
+        Uri.parse(Urls.forgetPasswordOtp(email)),
+        headers: {'Content-Type': 'application/json'},
+        body: body,
+      ).timeout(const Duration(seconds: 30));
+
+      debugPrint('AuthController.verifyCode status: ${resp.statusCode}');
+      debugPrint('AuthController.verifyCode resp: ${resp.body}');
+
+      EasyLoading.dismiss();
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final parsed = jsonDecode(resp.body);
+        final success = parsed['success'] == true;
+
+        if (success) {
+          // Store the token for reset password
+          _forgotPasswordToken = parsed['access'] ?? parsed['token'];
+          debugPrint('AuthController.verifyCode token stored: $_forgotPasswordToken');
+          
+          EasyLoading.showSuccess(parsed['message'] ?? 'Code verified successfully');
+          // Navigate to reset password screen
+          goToResetPassword();
+          return true;
+        }
       }
 
-      Get.snackbar(
-        'Success',
-        'Code verified successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+      String message = resp.body;
+      try {
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message'] ?? parsed['error'] ?? resp.body;
+      } catch (_) {}
 
-      // Navigate to reset password screen
-      goToResetPassword();
-
-      return true;
+      EasyLoading.showError(message);
+      return false;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to verify code: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      EasyLoading.dismiss();
+      debugPrint('AuthController.verifyCode error: $e');
+      EasyLoading.showError('Failed to verify code: ${e.toString()}');
       return false;
     } finally {
       _isLoading.value = false;
@@ -543,30 +534,60 @@ class AuthController extends GetxController {
     _isLoading.value = true;
 
     try {
-      // TODO: Implement actual password reset
-      await Future.delayed(const Duration(seconds: 2));
+      EasyLoading.show(status: 'Please wait...');
 
-      Get.snackbar(
-        'Success',
-        'Password reset successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+      final body = jsonEncode({
+        'new_password': newPassword,
+      });
 
-      // Clear forgot password fields
-      clearForgotPasswordForm();
+      debugPrint('AuthController.resetPassword URL: ${Urls.resetPassword}');
+      debugPrint('AuthController.resetPassword body: $body');
+      debugPrint('AuthController.resetPassword token: $_forgotPasswordToken');
 
-      // Switch back to sign in mode
-      switchToSignIn();
+      final resp = await http.post(
+        Uri.parse(Urls.resetPassword),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_forgotPasswordToken',
+        },
+        body: body,
+      ).timeout(const Duration(seconds: 30));
+
+      debugPrint('AuthController.resetPassword status: ${resp.statusCode}');
+      debugPrint('AuthController.resetPassword resp: ${resp.body}');
+
+      EasyLoading.dismiss();
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        final parsed = jsonDecode(resp.body);
+        final success = parsed['success'] == true;
+
+        if (success) {
+          EasyLoading.showSuccess(parsed['message'] ?? 'Password reset successfully!');
+          
+          // Clear the token
+          _forgotPasswordToken = null;
+          
+          // Clear forgot password fields
+          clearForgotPasswordForm();
+
+          // Switch back to sign in mode
+          switchToSignIn();
+          return;
+        }
+      }
+
+      String message = resp.body;
+      try {
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message'] ?? parsed['error'] ?? resp.body;
+      } catch (_) {}
+
+      EasyLoading.showError(message);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to reset password: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      EasyLoading.dismiss();
+      debugPrint('AuthController.resetPassword error: $e');
+      EasyLoading.showError('Failed to reset password: ${e.toString()}');
     } finally {
       _isLoading.value = false;
     }

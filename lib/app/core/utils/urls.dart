@@ -3,6 +3,12 @@ class Urls{
   static const String signUp ="$baseUrl/auth/signup/";
   static String signUpOtp(String email) => "$baseUrl/auth/verify/$email/";
   static String signIn = "$baseUrl/auth/login/";
+  static String forgetPassword ="$baseUrl/auth/forgetpassword/";
+  static String forgetPasswordOtp(String email) => "$baseUrl/auth/vefiry_for_forget/$email/";
+  static String resetPassword = "$baseUrl/auth/reset_password/";
+ 
   
+
+
 
 }
