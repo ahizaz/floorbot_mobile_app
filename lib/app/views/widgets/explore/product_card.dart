@@ -11,6 +11,8 @@ class ProductCard extends StatelessWidget {
   final String price;
   final VoidCallback? onTap;
   final VoidCallback? onAddTap;
+  final String? width;
+  final String? length;
 
   const ProductCard({
     super.key,
@@ -21,6 +23,8 @@ class ProductCard extends StatelessWidget {
     required this.price,
     this.onTap,
     this.onAddTap,
+    this.width,
+    this.length,
   }) : assert(
          imageUrl != null || imageAsset != null,
          'Either imageUrl or imageAsset must be provided',
@@ -140,8 +144,11 @@ class ProductCard extends StatelessWidget {
                             overflow: TextOverflow.ellipsis,
                           ),
                           SizedBox(height: 1.h), // Reduced spacing
+                          // Show width x length if available, otherwise show subtitle
                           Text(
-                            subtitle,
+                            (width != null && length != null) 
+                                ? '$width x $length cm'
+                                : subtitle,
                             style: TextStyle(
                               fontSize: 10.sp, // Reduced font size
                               color: Colors.grey[600],

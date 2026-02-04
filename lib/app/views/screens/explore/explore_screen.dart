@@ -91,6 +91,8 @@ class ExploreTab extends StatelessWidget {
                             title: product.name,
                             subtitle: product.description,
                             price: controller.formatProductPrice(product),
+                            width: product.width,
+                            length: product.length,
                             onTap: () => controller.onProductTap(product.id),
                             onAddTap: () => controller.onAddToCart(product),
                           );
@@ -122,6 +124,8 @@ class ExploreTab extends StatelessWidget {
                             title: product.name,
                             subtitle: product.description,
                             price: controller.formatProductPrice(product),
+                            width: product.width,
+                            length: product.length,
                             onTap: () => controller.onProductTap(product.id),
                             onAddTap: () => controller.onAddToCart(product),
                           );

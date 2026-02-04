@@ -9,6 +9,9 @@ class Product {
   final String? imageUrl;
   final String category;
   final ProductCalculatorConfig calculatorConfig;
+  final String? length;
+  final String? width;
+  final String? returnPolicy;
 
   Product({
     required this.id,
@@ -19,6 +22,9 @@ class Product {
     this.imageUrl,
     required this.category,
     ProductCalculatorConfig? calculatorConfig,
+    this.length,
+    this.width,
+    this.returnPolicy,
   }) : calculatorConfig =
            calculatorConfig ?? ProductCalculatorConfig.disabled();
 
@@ -42,6 +48,9 @@ class Product {
       imageUrl: json['primary_image'],
       category: json['main_category']?.toString() ?? 'General',
       calculatorConfig: ProductCalculatorConfig.disabled(),
+      length: json['length']?.toString(),
+      width: json['width']?.toString(),
+      returnPolicy: json['return_policy']?.toString(),
     );
   }
 }

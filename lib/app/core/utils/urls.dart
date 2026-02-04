@@ -9,6 +9,7 @@ class Urls{
   static const String catagoriesScreen = "$baseUrl/users/categories/";
   static const String catagories = "$baseUrl/users/categories/";
  static const String newProduct ="$baseUrl/users/products/?search=newest";
+ static const String bestDeals = "$baseUrl/users/products/?search=best";
   
 
 

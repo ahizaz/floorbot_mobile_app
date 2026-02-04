@@ -205,7 +205,7 @@ class ProductsDetails extends StatelessWidget {
                             isExpanded: controller.isReturnPolicyExpanded.value,
                             onTap: controller.toggleReturnPolicy,
                             expandedContent: Text(
-                              '30-day return policy. Items must be in original condition with packaging. Return shipping costs may apply.',
+                              product.returnPolicy ?? '30-day return policy. Items must be in original condition with packaging. Return shipping costs may apply.',
                               style: TextStyle(
                                 fontSize: 13.sp,
                                 color: Colors.grey[700],
