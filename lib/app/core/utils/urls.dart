@@ -8,8 +8,11 @@ class Urls{
   static String resetPassword = "$baseUrl/auth/reset_password/";
   static const String catagoriesScreen = "$baseUrl/users/categories/";
   static const String catagories = "$baseUrl/users/categories/";
- static const String newProduct ="$baseUrl/users/products/?search=newest";
- static const String bestDeals = "$baseUrl/users/products/?search=best";
+  static const String newProduct ="$baseUrl/users/products/?search=newest";
+  static const String bestDeals = "$baseUrl/users/products/?search=best";
+  //static const String search ="$baseUrl/users/products/?search=soft carpet";
+  static String searchProducts(String query) => "$baseUrl/users/products/?search=$query";
+
  
   
 

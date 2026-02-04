@@ -290,83 +290,79 @@ class ProductSearchController extends GetxController {
     debugPrint('SearchController: Loaded default best deals');
   }
 
+  // Fetch search results from API
+  Future<void> _fetchSearchResultsFromAPI(String query) async {
+    try {
+      EasyLoading.show(status: 'Searching...');
+      
+      debugPrint('SearchController: Searching for "$query" from ${Urls.searchProducts(query)}');
+      
+      // Get bearer token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('SearchController: Token: $token');
+      
+      // Make API call with bearer token
+      final response = await http.get(
+        Uri.parse(Urls.searchProducts(query)),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+      
+      debugPrint('SearchController: Search Status Code: ${response.statusCode}');
+      debugPrint('SearchController: Search Response Body: ${response.body}');
+      
+      EasyLoading.dismiss();
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('SearchController: Parsed JSON: $jsonData');
+        
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> productsJson = jsonData['data'];
+          debugPrint('SearchController: Search results count: ${productsJson.length}');
+          
+          // Map JSON to Product objects
+          searchResults.value = productsJson
+              .map((json) => Product.fromJson(json))
+              .toList();
+          
+          debugPrint('SearchController: Successfully loaded ${searchResults.length} search results');
+          
+          if (searchResults.isEmpty) {
+            EasyLoading.showInfo('No products found for "$query"');
+          } else {
+            EasyLoading.showSuccess('Found ${searchResults.length} products');
+          }
+        } else {
+          debugPrint('SearchController: Invalid response format for search');
+          searchResults.clear();
+          EasyLoading.showError('Failed to load search results');
+        }
+      } else {
+        debugPrint('SearchController: Failed with status ${response.statusCode}');
+        searchResults.clear();
+        EasyLoading.showError('Search failed');
+      }
+    } catch (e) {
+      debugPrint('SearchController: Error fetching search results: $e');
+      EasyLoading.dismiss();
+      searchResults.clear();
+      EasyLoading.showError('Error: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void _performSearch(String query) {
-    print('Performing search for: $query'); // Debug log
+    debugPrint('SearchController: Performing search for: $query');
     isSearching.value = true;
     isLoading.value = true;
 
-    // Perform search across all products with better fuzzy matching
-    final lowercaseQuery = query.toLowerCase().trim();
-
-    print('All products count: ${allProducts.length}'); // Debug log
-
-    searchResults.value = allProducts.where((product) {
-      final name = product.name.toLowerCase();
-      final category = product.category.toLowerCase();
-      final description = product.description.toLowerCase();
-
-      // Check for exact matches first
-      if (name.contains(lowercaseQuery) ||
-          category.contains(lowercaseQuery) ||
-          description.contains(lowercaseQuery)) {
-        return true;
-      }
-
-      // Check for fuzzy matching (individual words)
-      final queryWords = lowercaseQuery.split(' ');
-      for (String word in queryWords) {
-        if (word.isNotEmpty &&
-            (name.contains(word) || category.contains(word))) {
-          return true;
-        }
-      }
-
-      return false;
-    }).toList();
-
-    print('Search results count: ${searchResults.length}'); // Debug log
-
-    // Sort results by relevance (exact matches first)
-    searchResults.sort((a, b) {
-      int scoreA = _calculateRelevanceScore(a, lowercaseQuery);
-      int scoreB = _calculateRelevanceScore(b, lowercaseQuery);
-      return scoreB.compareTo(scoreA); // Higher scores first
-    });
-
-    isLoading.value = false;
-  }
-
-  int _calculateRelevanceScore(Product product, String query) {
-    int score = 0;
-    final name = product.name.toLowerCase();
-    final category = product.category.toLowerCase();
-
-    // Exact name match gets highest score
-    if (name == query)
-      score += 100;
-    else if (name.startsWith(query))
-      score += 80;
-    else if (name.contains(query))
-      score += 60;
-
-    // Category matches
-    if (category == query)
-      score += 70;
-    else if (category.startsWith(query))
-      score += 50;
-    else if (category.contains(query))
-      score += 30;
-
-    // Word matches
-    final queryWords = query.split(' ');
-    for (String word in queryWords) {
-      if (word.isNotEmpty) {
-        if (name.contains(word)) score += 20;
-        if (category.contains(word)) score += 15;
-      }
-    }
-
-    return score;
+    // Call the API to fetch search results
+    _fetchSearchResultsFromAPI(query);
   }
 
   void clearSearch() {
