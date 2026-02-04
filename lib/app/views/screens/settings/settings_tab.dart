@@ -1,7 +1,9 @@
 import 'package:floor_bot_mobile/app/controllers/order_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/orders/order_details_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/account_settings_bottom_sheet.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/reset_password_bottom_sheet.dart';
+import 'package:floor_bot_mobile/app/views/screens/initial_view/welcome_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/settings/settings_bottom_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -357,14 +359,11 @@ class SettingsTab extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () {
-              // Handle logout
+            onPressed: () async {
               Navigator.pop(context);
-              Get.snackbar(
-                'Logged Out',
-                'You have been logged out successfully',
-                snackPosition: SnackPosition.BOTTOM,
-              );
+              final authController = Get.find<AuthController>();
+              await authController.logout();
+              Get.offAll(() => const WelcomeScreen());
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,

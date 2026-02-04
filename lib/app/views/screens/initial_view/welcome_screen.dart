@@ -9,9 +9,29 @@ import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_outlined_butto
 import 'package:floor_bot_mobile/app/views/widgets/buttons/custom_text_button.dart';
 import 'package:floor_bot_mobile/app/views/widgets/common/or_divider.dart';
 import 'package:floor_bot_mobile/app/views/screens/auth/views/auth_bottom_sheet.dart';
+import 'package:floor_bot_mobile/app/views/screens/bottom_nav/app_nav_view.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final authController = Get.put(AuthController());
+    final isLoggedIn = await authController.checkLoginStatus();
+    if (isLoggedIn && mounted) {
+      Get.offAll(() => const AppNavView());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

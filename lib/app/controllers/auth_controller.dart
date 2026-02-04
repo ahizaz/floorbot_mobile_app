@@ -53,6 +53,35 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
+  // Check if user is already logged in
+  Future<bool> checkLoginStatus() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access');
+      debugPrint('AuthController.checkLoginStatus token: $token');
+      return token != null && token.isNotEmpty;
+    } catch (e) {
+      debugPrint('AuthController.checkLoginStatus error: $e');
+      return false;
+    }
+  }
+
+  // Logout user
+  Future<void> logout() async {
+    try {
+      EasyLoading.show(status: 'Logging out...');
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('access');
+      debugPrint('AuthController.logout: Token removed');
+      EasyLoading.dismiss();
+      EasyLoading.showSuccess('Logged out successfully');
+    } catch (e) {
+      debugPrint('AuthController.logout error: $e');
+      EasyLoading.dismiss();
+      EasyLoading.showError('Failed to logout');
+    }
+  }
+
   // Switch between sign in and sign up
   void switchToSignIn() {
     _authMode.value = AuthMode.signIn;
