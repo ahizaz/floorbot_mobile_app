@@ -1,5 +1,6 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/models/cart_item.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -17,6 +18,17 @@ class CartItemCard extends StatelessWidget {
     required this.onDecrement,
     required this.onRemove,
   });
+
+  String? get _fullImageUrl {
+    if (item.imageUrl != null) {
+      if (item.imageUrl!.startsWith('http')) {
+        return item.imageUrl;
+      }
+      final baseUrlWithoutApi = Urls.baseUrl.replaceAll('/api/v1', '');
+      return '$baseUrlWithoutApi${item.imageUrl}';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +57,47 @@ class CartItemCard extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
-                  child: Image.asset(item.imageAsset, fit: BoxFit.cover),
+                  child: _fullImageUrl != null
+                      ? Image.network(
+                          _fullImageUrl!,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                                strokeWidth: 2,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.image,
+                              size: 40.sp,
+                              color: Colors.grey,
+                            );
+                          },
+                        )
+                      : item.imageAsset != null
+                          ? Image.asset(
+                              item.imageAsset!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.image,
+                                  size: 40.sp,
+                                  color: Colors.grey,
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.image,
+                              size: 40.sp,
+                              color: Colors.grey,
+                            ),
                 ),
               ),
 

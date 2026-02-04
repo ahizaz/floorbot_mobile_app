@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -24,6 +25,19 @@ class ProductCard extends StatelessWidget {
          imageUrl != null || imageAsset != null,
          'Either imageUrl or imageAsset must be provided',
        );
+
+  String? get _fullImageUrl {
+    if (imageUrl != null) {
+      // If imageUrl starts with http, use it as is
+      if (imageUrl!.startsWith('http')) {
+        return imageUrl;
+      }
+      // Otherwise, prepend base URL (remove /api/v1 from baseUrl and use the root)
+      final baseUrlWithoutApi = Urls.baseUrl.replaceAll('/api/v1', '');
+      return '$baseUrlWithoutApi$imageUrl';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,11 +67,25 @@ class ProductCard extends StatelessWidget {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(12.r)),
               ),
               child: Center(
-                child: imageAsset != null
-                    ? Image.asset(
-                        imageAsset!,
+                child: _fullImageUrl != null
+                    ? Image.network(
+                        _fullImageUrl!,
+                        width: double.infinity,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                            ),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
+                          debugPrint('ProductCard: Error loading image: $error');
                           return Icon(
                             Icons.image,
                             size: 48.sp,
@@ -65,17 +93,23 @@ class ProductCard extends StatelessWidget {
                           );
                         },
                       )
-                    : Image.network(
-                        imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
+                    : imageAsset != null
+                        ? Image.asset(
+                            imageAsset!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.image,
+                                size: 48.sp,
+                                color: Colors.grey,
+                              );
+                            },
+                          )
+                        : Icon(
                             Icons.image,
                             size: 48.sp,
                             color: Colors.grey,
-                          );
-                        },
-                      ),
+                          ),
               ),
             ),
 

@@ -1,11 +1,13 @@
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProductImageCarousel extends StatelessWidget {
-  final List<String> images;
+  final List<String?> images;
   final int currentIndex;
   final PageController pageController;
   final Function(int) onPageChanged;
+  final bool isNetworkImage;
 
   const ProductImageCarousel({
     super.key,
@@ -13,10 +15,40 @@ class ProductImageCarousel extends StatelessWidget {
     required this.currentIndex,
     required this.pageController,
     required this.onPageChanged,
+    this.isNetworkImage = false,
   });
+
+  String? _getFullImageUrl(String? imageUrl) {
+    if (imageUrl == null) return null;
+    
+    // If imageUrl starts with http, use it as is
+    if (imageUrl.startsWith('http')) {
+      return imageUrl;
+    }
+    // Otherwise, prepend base URL (remove /api/v1 from baseUrl and use the root)
+    final baseUrlWithoutApi = Urls.baseUrl.replaceAll('/api/v1', '');
+    return '$baseUrlWithoutApi$imageUrl';
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Filter out null images
+    final validImages = images.where((img) => img != null).toList();
+    
+    if (validImages.isEmpty) {
+      return Container(
+        height: 300.h,
+        color: Colors.grey[100],
+        child: Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 100.sp,
+            color: Colors.grey[400],
+          ),
+        ),
+      );
+    }
+
     return Container(
       height: 300.h,
       color: Colors.white,
@@ -25,22 +57,47 @@ class ProductImageCarousel extends StatelessWidget {
           PageView.builder(
             controller: pageController,
             onPageChanged: onPageChanged,
-            itemCount: images.length,
+            itemCount: validImages.length,
             itemBuilder: (context, index) {
+              final image = validImages[index];
               return Center(
                 child: Padding(
                   padding: EdgeInsets.all(20.w),
-                  child: Image.asset(
-                    images[index],
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.image,
-                        size: 100.sp,
-                        color: Colors.grey[400],
-                      );
-                    },
-                  ),
+                  child: isNetworkImage
+                      ? Image.network(
+                          _getFullImageUrl(image)!,
+                          fit: BoxFit.contain,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Center(
+                              child: CircularProgressIndicator(
+                                value: loadingProgress.expectedTotalBytes != null
+                                    ? loadingProgress.cumulativeBytesLoaded /
+                                        loadingProgress.expectedTotalBytes!
+                                    : null,
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            debugPrint('ProductImageCarousel: Error loading image: $error');
+                            return Icon(
+                              Icons.image,
+                              size: 100.sp,
+                              color: Colors.grey[400],
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          image!,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.image,
+                              size: 100.sp,
+                              color: Colors.grey[400],
+                            );
+                          },
+                        ),
                 ),
               );
             },
@@ -53,7 +110,7 @@ class ProductImageCarousel extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(
-                images.length,
+                validImages.length,
                 (index) => Container(
                   margin: EdgeInsets.symmetric(horizontal: 4.w),
                   width: index == currentIndex ? 24.w : 8.w,
@@ -86,7 +143,7 @@ class ProductImageCarousel extends StatelessWidget {
                 ],
               ),
               child: Text(
-                '${currentIndex + 1}/${images.length}',
+                '${currentIndex + 1}/${validImages.length}',
                 style: TextStyle(
                   fontSize: 12.sp,
                   fontWeight: FontWeight.w500,

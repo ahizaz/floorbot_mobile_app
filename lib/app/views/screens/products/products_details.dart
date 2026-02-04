@@ -102,18 +102,21 @@ class ProductsDetails extends StatelessWidget {
                 children: [
                   // Image carousel
                   Obx(
-                    () => ProductImageCarousel(
-                      images: [
-                        product.imageAsset,
-                        product.imageAsset,
-                        product.imageAsset,
-                        product.imageAsset,
-                        product.imageAsset,
-                      ],
-                      currentIndex: controller.currentImageIndex.value,
-                      pageController: controller.pageController,
-                      onPageChanged: controller.onPageChanged,
-                    ),
+                    () {
+                      // Determine if we should use network images or asset images
+                      final hasImageUrl = product.imageUrl != null;
+                      final images = hasImageUrl 
+                          ? [product.imageUrl, product.imageUrl, product.imageUrl] 
+                          : [product.imageAsset, product.imageAsset, product.imageAsset];
+                      
+                      return ProductImageCarousel(
+                        images: images,
+                        currentIndex: controller.currentImageIndex.value,
+                        pageController: controller.pageController,
+                        onPageChanged: controller.onPageChanged,
+                        isNetworkImage: hasImageUrl,
+                      );
+                    },
                   ),
 
                   SizedBox(height: 20.h),

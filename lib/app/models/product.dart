@@ -5,7 +5,8 @@ class Product {
   final String name;
   final String description;
   final double price; // Price in GBP (base currency)
-  final String imageAsset;
+  final String? imageAsset;
+  final String? imageUrl;
   final String category;
   final ProductCalculatorConfig calculatorConfig;
 
@@ -14,11 +15,39 @@ class Product {
     required this.name,
     required this.description,
     required this.price,
-    required this.imageAsset,
+    this.imageAsset,
+    this.imageUrl,
     required this.category,
     ProductCalculatorConfig? calculatorConfig,
   }) : calculatorConfig =
            calculatorConfig ?? ProductCalculatorConfig.disabled();
+
+  // Factory constructor to create Product from API JSON response
+  factory Product.fromJson(Map<String, dynamic> json) {
+    // Parse prices
+    final salePrice = double.tryParse(json['sale_price']?.toString() ?? '0') ?? 0.0;
+    final regularPrice = double.tryParse(json['regular_price']?.toString() ?? '0') ?? 0.0;
+    
+    // Use sale price if available and not 0, otherwise use regular price
+    final price = (salePrice > 0) ? salePrice : regularPrice;
+    
+    // Create description from length x width
+    final length = json['length']?.toString() ?? '';
+    final width = json['width']?.toString() ?? '';
+    final description = (length.isNotEmpty && width.isNotEmpty) 
+        ? '$length x $width cm' 
+        : 'No dimensions';
+    
+    return Product(
+      id: json['id'].toString(),
+      name: json['product_title'] ?? 'Unnamed Product',
+      description: description,
+      price: price,
+      imageUrl: json['primary_image'],
+      category: json['main_category']?.toString() ?? 'General',
+      calculatorConfig: ProductCalculatorConfig.disabled(),
+    );
+  }
 }
 
 class Category {

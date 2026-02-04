@@ -87,6 +87,7 @@ class ExploreTab extends StatelessWidget {
                           final product = controller.newArrivals[index];
                           return ProductCard(
                             imageAsset: product.imageAsset,
+                            imageUrl: product.imageUrl,
                             title: product.name,
                             subtitle: product.description,
                             price: controller.formatProductPrice(product),
@@ -117,6 +118,7 @@ class ExploreTab extends StatelessWidget {
                           final product = controller.bestDeals[index];
                           return ProductCard(
                             imageAsset: product.imageAsset,
+                            imageUrl: product.imageUrl,
                             title: product.name,
                             subtitle: product.description,
                             price: controller.formatProductPrice(product),

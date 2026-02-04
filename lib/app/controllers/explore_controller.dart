@@ -23,7 +23,7 @@ class ExploreController extends GetxController {
   void onInit() {
     super.onInit();
     _fetchCategoriesFromAPI();
-    _loadNewArrivals();
+    _fetchNewArrivalsFromAPI();
     _loadBestDeals();
   }
 
@@ -100,7 +100,67 @@ class ExploreController extends GetxController {
     debugPrint('ExploreController: Loaded default categories');
   }
 
-  void _loadNewArrivals() {
+  // Fetch new arrivals from API
+  Future<void> _fetchNewArrivalsFromAPI() async {
+    try {
+      EasyLoading.show(status: 'Loading products...');
+      
+      debugPrint('ExploreController: Fetching new arrivals from ${Urls.newProduct}');
+      
+      // Get bearer token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('ExploreController: Token: $token');
+      
+      // Make API call with bearer token
+      final response = await http.get(
+        Uri.parse(Urls.newProduct),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+      
+      debugPrint('ExploreController: New Arrivals Status Code: ${response.statusCode}');
+      debugPrint('ExploreController: New Arrivals Response Body: ${response.body}');
+      
+      EasyLoading.dismiss();
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('ExploreController: Parsed JSON: $jsonData');
+        
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> productsJson = jsonData['data'];
+          debugPrint('ExploreController: Products count: ${productsJson.length}');
+          
+          // Map JSON to Product objects
+          newArrivals.value = productsJson
+              .map((json) => Product.fromJson(json))
+              .toList();
+          
+          debugPrint('ExploreController: Successfully loaded ${newArrivals.length} new arrival products');
+          EasyLoading.showSuccess('Products loaded!');
+        } else {
+          debugPrint('ExploreController: Invalid response format for products');
+          _loadDefaultNewArrivals();
+          EasyLoading.showError('Failed to load products');
+        }
+      } else {
+        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        _loadDefaultNewArrivals();
+        EasyLoading.showError('Failed to fetch products');
+      }
+    } catch (e) {
+      debugPrint('ExploreController: Error fetching new arrivals: $e');
+      EasyLoading.dismiss();
+      _loadDefaultNewArrivals();
+      EasyLoading.showError('Error: ${e.toString()}');
+    }
+  }
+
+  // Fallback to default new arrivals if API fails
+  void _loadDefaultNewArrivals() {
     newArrivals.value = [
       Product(
         id: '1',
@@ -110,7 +170,7 @@ class ExploreController extends GetxController {
         imageAsset: AppImages.solidWood,
         category: 'Wood Floor',
         calculatorConfig: ProductCalculatorConfig.boxBased(
-          coveragePerBox: 28.0, // 4x7 coverage per box
+          coveragePerBox: 28.0,
         ),
       ),
       Product(
@@ -121,7 +181,7 @@ class ExploreController extends GetxController {
         imageAsset: AppImages.parquet,
         category: 'Wood Floor',
         calculatorConfig: ProductCalculatorConfig.boxBased(
-          coveragePerBox: 16.0, // 4x4 coverage per box
+          coveragePerBox: 16.0,
         ),
       ),
       Product(
@@ -132,7 +192,7 @@ class ExploreController extends GetxController {
         imageAsset: AppImages.ceramic,
         category: 'Laminate',
         calculatorConfig: ProductCalculatorConfig.boxBased(
-          coveragePerBox: 15.0, // 3x5 coverage per box
+          coveragePerBox: 15.0,
         ),
       ),
       Product(
@@ -143,10 +203,11 @@ class ExploreController extends GetxController {
         imageAsset: AppImages.beige,
         category: 'Wood Floor',
         calculatorConfig: ProductCalculatorConfig.boxBased(
-          coveragePerBox: 35.0, // 5x7 coverage per box
+          coveragePerBox: 35.0,
         ),
       ),
     ];
+    debugPrint('ExploreController: Loaded default new arrivals');
   }
 
   void _loadBestDeals() {

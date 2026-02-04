@@ -71,6 +71,7 @@ class CartController extends GetxController {
           productId: product.id,
           name: product.name,
           imageAsset: product.imageAsset,
+          imageUrl: product.imageUrl,
           price: product.price,
           size: product.description,
           quantity: quantity,

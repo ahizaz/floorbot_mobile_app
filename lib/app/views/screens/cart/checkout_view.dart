@@ -92,10 +92,7 @@ class CheckoutView extends StatelessWidget {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
-                                child: Image.asset(
-                                  controller.cartItems.first.imageAsset,
-                                  fit: BoxFit.cover,
-                                ),
+                                child: _buildCartItemImage(controller.cartItems.first),
                               ),
                             ),
 
@@ -382,5 +379,52 @@ class CheckoutView extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildCartItemImage(dynamic item) {
+    final imageUrl = item.imageUrl;
+    final imageAsset = item.imageAsset;
+    
+    String? fullImageUrl;
+    if (imageUrl != null) {
+      if (imageUrl.startsWith('http')) {
+        fullImageUrl = imageUrl;
+      } else {
+        final baseUrlWithoutApi = 'http://10.10.12.15:8089';
+        fullImageUrl = '$baseUrlWithoutApi$imageUrl';
+      }
+    }
+    
+    if (fullImageUrl != null) {
+      return Image.network(
+        fullImageUrl,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded /
+                      loadingProgress.expectedTotalBytes!
+                  : null,
+              strokeWidth: 2,
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.image, size: 60.sp, color: Colors.grey);
+        },
+      );
+    } else if (imageAsset != null) {
+      return Image.asset(
+        imageAsset,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Icon(Icons.image, size: 60.sp, color: Colors.grey);
+        },
+      );
+    }
+    
+    return Icon(Icons.image, size: 60.sp, color: Colors.grey);
   }
 }
