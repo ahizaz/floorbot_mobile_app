@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 
 class CategoryCard extends StatelessWidget {
   final String title;
@@ -17,6 +18,19 @@ class CategoryCard extends StatelessWidget {
          imageUrl != null || imageAsset != null,
          'Either imageUrl or imageAsset must be provided',
        );
+
+  String? get _fullImageUrl {
+    if (imageUrl != null) {
+      // If imageUrl starts with http, use it as is
+      if (imageUrl!.startsWith('http')) {
+        return imageUrl;
+      }
+      // Otherwise, prepend base URL (remove /api/v1 from baseUrl and use the root)
+      final baseUrlWithoutApi = Urls.baseUrl.replaceAll('/api/v1', '');
+      return '$baseUrlWithoutApi$imageUrl';
+    }
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +55,24 @@ class CategoryCard extends StatelessWidget {
             child: ClipOval(
               child: Padding(
                 padding: EdgeInsets.all(12.w),
-                child: imageAsset != null
-                    ? Image.asset(
-                        imageAsset!,
+                child: _fullImageUrl != null
+                    ? Image.network(
+                        _fullImageUrl!,
                         fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                              strokeWidth: 2,
+                            ),
+                          );
+                        },
                         errorBuilder: (context, error, stackTrace) {
+                          debugPrint('CategoryCard: Error loading image: $error');
                           return Icon(
                             Icons.category,
                             size: 40.sp,
@@ -53,17 +80,23 @@ class CategoryCard extends StatelessWidget {
                           );
                         },
                       )
-                    : Image.network(
-                        imageUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(
+                    : imageAsset != null
+                        ? Image.asset(
+                            imageAsset!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Icon(
+                                Icons.category,
+                                size: 40.sp,
+                                color: Colors.grey,
+                              );
+                            },
+                          )
+                        : Icon(
                             Icons.category,
                             size: 40.sp,
                             color: Colors.grey,
-                          );
-                        },
-                      ),
+                          ),
               ),
             ),
           ),

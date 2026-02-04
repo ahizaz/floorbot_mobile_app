@@ -47,17 +47,23 @@ class ExploreTab extends StatelessWidget {
                     SizedBox(height: 20.h),
 
                     // Categories
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20.w),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: controller.categories.map((category) {
+                    SizedBox(
+                      height: 120.h,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: EdgeInsets.symmetric(horizontal: 20.w),
+                        itemCount: controller.categories.length,
+                        separatorBuilder: (context, index) =>
+                            SizedBox(width: 16.w),
+                        itemBuilder: (context, index) {
+                          final category = controller.categories[index];
                           return CategoryCard(
                             title: category.name,
                             imageAsset: category.imageAsset,
+                            imageUrl: category.imageUrl,
                             onTap: () => controller.onCategoryTap(category.id),
                           );
-                        }).toList(),
+                        },
                       ),
                     ),
 

@@ -6,6 +6,8 @@ class Urls{
   static String forgetPassword ="$baseUrl/auth/forgetpassword/";
   static String forgetPasswordOtp(String email) => "$baseUrl/auth/vefiry_for_forget/$email/";
   static String resetPassword = "$baseUrl/auth/reset_password/";
+  static const String catagoriesScreen = "$baseUrl/users/categories/";
+  static const String catagories = "$baseUrl/users/categories/";
  
   
 

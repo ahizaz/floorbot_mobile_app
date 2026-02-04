@@ -4,29 +4,100 @@ import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
 import 'package:floor_bot_mobile/app/views/screens/category/category_products_screen.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ExploreController extends GetxController {
   // Observable lists
   final RxList<Category> categories = <Category>[].obs;
   final RxList<Product> newArrivals = <Product>[].obs;
   final RxList<Product> bestDeals = <Product>[].obs;
+  final RxBool isLoadingCategories = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadCategories();
+    _fetchCategoriesFromAPI();
     _loadNewArrivals();
     _loadBestDeals();
   }
 
-  void _loadCategories() {
+  // Fetch categories from API
+  Future<void> _fetchCategoriesFromAPI() async {
+    try {
+      isLoadingCategories.value = true;
+      EasyLoading.show(status: 'Loading categories...');
+      
+      debugPrint('ExploreController: Fetching categories from ${Urls.catagories}');
+      
+      // Get bearer token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('ExploreController: Token: $token');
+      
+      // Make API call with bearer token
+      final response = await http.get(
+        Uri.parse(Urls.catagories),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+      
+      debugPrint('ExploreController: Status Code: ${response.statusCode}');
+      debugPrint('ExploreController: Response Body: ${response.body}');
+      
+      EasyLoading.dismiss();
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('ExploreController: Parsed JSON: $jsonData');
+        
+        if (jsonData['success'] == true && jsonData['categories'] != null) {
+          final List<dynamic> categoriesJson = jsonData['categories'];
+          debugPrint('ExploreController: Categories count: ${categoriesJson.length}');
+          
+          // Map JSON to Category objects
+          categories.value = categoriesJson
+              .map((json) => Category.fromJson(json))
+              .toList();
+          
+          debugPrint('ExploreController: Successfully loaded ${categories.length} categories');
+          EasyLoading.showSuccess('Categories loaded!');
+        } else {
+          debugPrint('ExploreController: Invalid response format');
+          _loadDefaultCategories();
+          EasyLoading.showError('Failed to load categories');
+        }
+      } else {
+        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        _loadDefaultCategories();
+        EasyLoading.showError('Failed to fetch categories');
+      }
+    } catch (e) {
+      debugPrint('ExploreController: Error fetching categories: $e');
+      EasyLoading.dismiss();
+      _loadDefaultCategories();
+      EasyLoading.showError('Error: ${e.toString()}');
+    } finally {
+      isLoadingCategories.value = false;
+    }
+  }
+
+  // Fallback to default categories if API fails
+  void _loadDefaultCategories() {
     categories.value = [
       Category(id: '1', name: 'Carpets', imageAsset: AppImages.carpets),
       Category(id: '2', name: 'Vinyl', imageAsset: AppImages.vinyl),
       Category(id: '3', name: 'Laminate', imageAsset: AppImages.laminate),
       Category(id: '4', name: 'Wood Floor', imageAsset: AppImages.wood),
     ];
+    debugPrint('ExploreController: Loaded default categories');
   }
 
   void _loadNewArrivals() {

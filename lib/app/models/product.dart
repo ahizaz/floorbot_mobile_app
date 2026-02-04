@@ -24,7 +24,22 @@ class Product {
 class Category {
   final String id;
   final String name;
-  final String imageAsset;
+  final String? imageAsset;
+  final String? imageUrl;
 
-  Category({required this.id, required this.name, required this.imageAsset});
+  Category({
+    required this.id,
+    required this.name,
+    this.imageAsset,
+    this.imageUrl,
+  });
+
+  // Factory constructor to create Category from API JSON response
+  factory Category.fromJson(Map<String, dynamic> json) {
+    return Category(
+      id: json['id'].toString(),
+      name: json['title'] ?? json['name'] ?? '',
+      imageUrl: json['image'],
+    );
+  }
 }
