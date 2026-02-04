@@ -10,10 +10,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-class ProductsDetails extends StatelessWidget {
+class BestDealsProductDetails extends StatelessWidget {
   final Product product;
 
-  const ProductsDetails({super.key, required this.product});
+  const BestDealsProductDetails({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class ProductsDetails extends StatelessWidget {
         ),
         leadingWidth: 100.w,
         title: Text(
-          'Item Details',
+          'Best Deal Details',
           style: TextStyle(
             color: Colors.white,
             fontSize: 18.sp,

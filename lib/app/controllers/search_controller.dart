@@ -1,10 +1,16 @@
 import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/app_images.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/best_deals_product_details.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductSearchController extends GetxController {
   final TextEditingController searchTextController = TextEditingController();
@@ -24,7 +30,7 @@ class ProductSearchController extends GetxController {
     super.onInit();
     _loadSuggestedChips();
     _loadAllProducts();
-    _loadBestDeals();
+    _fetchBestDealsFromAPI();
 
     // Listen to text changes for real-time search
     searchTextController.addListener(() {
@@ -191,7 +197,58 @@ class ProductSearchController extends GetxController {
     ];
   }
 
-  void _loadBestDeals() {
+  // Fetch best deals from API
+  Future<void> _fetchBestDealsFromAPI() async {
+    try {
+      debugPrint('SearchController: Fetching best deals from ${Urls.bestDeals}');
+      
+      // Get bearer token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('SearchController: Token: $token');
+      
+      // Make API call with bearer token
+      final response = await http.get(
+        Uri.parse(Urls.bestDeals),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+      
+      debugPrint('SearchController: Best Deals Status Code: ${response.statusCode}');
+      debugPrint('SearchController: Best Deals Response Body: ${response.body}');
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('SearchController: Parsed JSON: $jsonData');
+        
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> productsJson = jsonData['data'];
+          debugPrint('SearchController: Best deals count: ${productsJson.length}');
+          
+          // Map JSON to Product objects
+          bestDeals.value = productsJson
+              .map((json) => Product.fromJson(json))
+              .toList();
+          
+          debugPrint('SearchController: Successfully loaded ${bestDeals.length} best deals products');
+        } else {
+          debugPrint('SearchController: Invalid response format for best deals');
+          _loadDefaultBestDeals();
+        }
+      } else {
+        debugPrint('SearchController: Failed with status ${response.statusCode}');
+        _loadDefaultBestDeals();
+      }
+    } catch (e) {
+      debugPrint('SearchController: Error fetching best deals: $e');
+      _loadDefaultBestDeals();
+    }
+  }
+
+  // Fallback to default best deals if API fails
+  void _loadDefaultBestDeals() {
     bestDeals.value = [
       Product(
         id: '1',
@@ -230,6 +287,7 @@ class ProductSearchController extends GetxController {
         calculatorConfig: ProductCalculatorConfig.boxBased(coveragePerBox: 2.2),
       ),
     ];
+    debugPrint('SearchController: Loaded default best deals');
   }
 
   void _performSearch(String query) {
@@ -334,6 +392,7 @@ class ProductSearchController extends GetxController {
   void onProductTap(String productId) {
     // Find the product from all available products
     Product? product;
+    bool isBestDeal = false;
 
     if (isSearching.value) {
       product = searchResults.firstWhereOrNull((p) => p.id == productId);
@@ -343,13 +402,26 @@ class ProductSearchController extends GetxController {
     product ??= allProducts.firstWhereOrNull((p) => p.id == productId);
 
     // Fallback to best deals
-    product ??= bestDeals.firstWhereOrNull((p) => p.id == productId);
+    if (product == null) {
+      product = bestDeals.firstWhereOrNull((p) => p.id == productId);
+      if (product != null) {
+        isBestDeal = true;
+      }
+    }
 
     if (product != null) {
-      Get.to(
-        () => ProductsDetails(product: product!),
-        transition: Transition.cupertino,
-      );
+      // Navigate to different details pages based on product type
+      if (isBestDeal) {
+        Get.to(
+          () => BestDealsProductDetails(product: product!),
+          transition: Transition.cupertino,
+        );
+      } else {
+        Get.to(
+          () => ProductsDetails(product: product!),
+          transition: Transition.cupertino,
+        );
+      }
     } else {
       Get.snackbar(
         'Error',

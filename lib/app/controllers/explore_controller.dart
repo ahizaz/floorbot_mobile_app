@@ -3,6 +3,8 @@ import 'package:floor_bot_mobile/app/core/utils/app_images.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
 import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/best_deals_product_details.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/all_products_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/category/category_products_screen.dart';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:get/get.dart';
@@ -24,7 +26,7 @@ class ExploreController extends GetxController {
     super.onInit();
     _fetchCategoriesFromAPI();
     _fetchNewArrivalsFromAPI();
-    _loadBestDeals();
+    _fetchBestDealsFromAPI();
   }
 
   // Fetch categories from API
@@ -210,7 +212,67 @@ class ExploreController extends GetxController {
     debugPrint('ExploreController: Loaded default new arrivals');
   }
 
-  void _loadBestDeals() {
+  // Fetch best deals from API
+  Future<void> _fetchBestDealsFromAPI() async {
+    try {
+      EasyLoading.show(status: 'Loading best deals...');
+      
+      debugPrint('ExploreController: Fetching best deals from ${Urls.bestDeals}');
+      
+      // Get bearer token from SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('ExploreController: Token: $token');
+      
+      // Make API call with bearer token
+      final response = await http.get(
+        Uri.parse(Urls.bestDeals),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      ).timeout(const Duration(seconds: 30));
+      
+      debugPrint('ExploreController: Best Deals Status Code: ${response.statusCode}');
+      debugPrint('ExploreController: Best Deals Response Body: ${response.body}');
+      
+      EasyLoading.dismiss();
+      
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('ExploreController: Parsed JSON: $jsonData');
+        
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final List<dynamic> productsJson = jsonData['data'];
+          debugPrint('ExploreController: Best deals count: ${productsJson.length}');
+          
+          // Map JSON to Product objects
+          bestDeals.value = productsJson
+              .map((json) => Product.fromJson(json))
+              .toList();
+          
+          debugPrint('ExploreController: Successfully loaded ${bestDeals.length} best deals products');
+          EasyLoading.showSuccess('Best deals loaded!');
+        } else {
+          debugPrint('ExploreController: Invalid response format for best deals');
+          _loadDefaultBestDeals();
+          EasyLoading.showError('Failed to load best deals');
+        }
+      } else {
+        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        _loadDefaultBestDeals();
+        EasyLoading.showError('Failed to fetch best deals');
+      }
+    } catch (e) {
+      debugPrint('ExploreController: Error fetching best deals: $e');
+      EasyLoading.dismiss();
+      _loadDefaultBestDeals();
+      EasyLoading.showError('Error: ${e.toString()}');
+    }
+  }
+
+  // Fallback to default best deals if API fails
+  void _loadDefaultBestDeals() {
     bestDeals.value = [
       Product(
         id: '5',
@@ -253,6 +315,7 @@ class ExploreController extends GetxController {
         calculatorConfig: ProductCalculatorConfig.carpet(),
       ),
     ];
+    debugPrint('ExploreController: Loaded default best deals');
   }
 
   // Actions
@@ -286,17 +349,25 @@ class ExploreController extends GetxController {
     );
   }
 
-  void onProductTap(String productId) {
+  void onProductTap(String productId, {bool isBestDeal = false}) {
     // Find the product and navigate to details
     final product = [
       ...newArrivals,
       ...bestDeals,
     ].firstWhere((p) => p.id == productId, orElse: () => newArrivals.first);
 
-    Get.to(
-      () => ProductsDetails(product: product),
-      transition: Transition.cupertino,
-    );
+    // Navigate to different details pages based on product type
+    if (isBestDeal) {
+      Get.to(
+        () => BestDealsProductDetails(product: product),
+        transition: Transition.cupertino,
+      );
+    } else {
+      Get.to(
+        () => ProductsDetails(product: product),
+        transition: Transition.cupertino,
+      );
+    }
   }
 
   void onAddToCart(Product product) {
@@ -309,20 +380,30 @@ class ExploreController extends GetxController {
   }
 
   void onShowAllNewArrivals() {
-    // TODO: Navigate to all new arrivals
-    Get.snackbar(
-      'New Arrivals',
-      'Showing all new arrivals...',
-      snackPosition: SnackPosition.BOTTOM,
+    Get.to(
+      () => AllProductsScreen(
+        title: 'New Arrivals',
+        products: List<Product>.from(newArrivals),
+        onProductTap: onProductTap,
+        onAddToCart: onAddToCart,
+        formatPrice: formatProductPrice,
+        isBestDeal: false,
+      ),
+      transition: Transition.cupertino,
     );
   }
 
   void onShowAllBestDeals() {
-    // TODO: Navigate to all best deals
-    Get.snackbar(
-      'Best Deals',
-      'Showing all best deals...',
-      snackPosition: SnackPosition.BOTTOM,
+    Get.to(
+      () => AllProductsScreen(
+        title: 'Best Deals',
+        products: List<Product>.from(bestDeals),
+        onProductTap: onProductTap,
+        onAddToCart: onAddToCart,
+        formatPrice: formatProductPrice,
+        isBestDeal: true,
+      ),
+      transition: Transition.cupertino,
     );
   }
 

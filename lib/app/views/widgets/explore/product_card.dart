@@ -25,10 +25,7 @@ class ProductCard extends StatelessWidget {
     this.onAddTap,
     this.width,
     this.length,
-  }) : assert(
-         imageUrl != null || imageAsset != null,
-         'Either imageUrl or imageAsset must be provided',
-       );
+  });
 
   String? get _fullImageUrl {
     if (imageUrl != null) {
@@ -90,6 +87,20 @@ class ProductCard extends StatelessWidget {
                         },
                         errorBuilder: (context, error, stackTrace) {
                           debugPrint('ProductCard: Error loading image: $error');
+                          // Fallback to asset image if network fails
+                          if (imageAsset != null) {
+                            return Image.asset(
+                              imageAsset!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) {
+                                return Icon(
+                                  Icons.image,
+                                  size: 48.sp,
+                                  color: Colors.grey,
+                                );
+                              },
+                            );
+                          }
                           return Icon(
                             Icons.image,
                             size: 48.sp,
@@ -100,6 +111,7 @@ class ProductCard extends StatelessWidget {
                     : imageAsset != null
                         ? Image.asset(
                             imageAsset!,
+                            width: double.infinity,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Icon(
@@ -120,39 +132,39 @@ class ProductCard extends StatelessWidget {
             // Content section - use Expanded to prevent overflow
             Expanded(
               child: Padding(
-                padding: EdgeInsets.all(8.w), // Reduced padding
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // Top section - product info
-                    Expanded(
-                      flex: 3,
+                    Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
                             title,
                             style: TextStyle(
-                              fontSize: 13.sp, // Reduced font size
+                              fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
-                              height: 1.2, // Reduced line height
+                              height: 1.2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          SizedBox(height: 1.h), // Reduced spacing
+                          SizedBox(height: 1.h),
                           // Show width x length if available, otherwise show subtitle
                           Text(
                             (width != null && length != null) 
                                 ? '$width x $length cm'
                                 : subtitle,
                             style: TextStyle(
-                              fontSize: 10.sp, // Reduced font size
+                              fontSize: 10.sp,
                               color: Colors.grey[600],
-                              height: 1.2, // Reduced line height
+                              height: 1.2,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -163,7 +175,7 @@ class ProductCard extends StatelessWidget {
 
                     // Bottom section - price and add button
                     SizedBox(
-                      height: 24.h, // Fixed height for bottom section
+                      height: 26.h,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,

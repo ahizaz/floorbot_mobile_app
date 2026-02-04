@@ -153,9 +153,12 @@ class SearchTab extends StatelessWidget {
 
                             return ProductCard(
                               imageAsset: product.imageAsset,
+                              imageUrl: product.imageUrl,
                               title: product.name,
                               subtitle: product.description,
                               price: controller.formatProductPrice(product),
+                              width: product.width,
+                              length: product.length,
                               onTap: () => controller.onProductTap(product.id),
                               onAddTap: () => controller.onAddToCart(product),
                             );
