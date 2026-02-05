@@ -24,21 +24,21 @@ class ExploreTab extends StatelessWidget {
       body: Column(
         children: [
           // Header
-          ExploreHeader(
-            userName: 'Sebastian',
-            location: 'Los Angeles, USA',
-            onSearchTap: () {
-              // Navigate to search tab
-              navController.changeTab(1);
-            },
-            onNotificationTap: () {
-              // TODO: Implement notifications
-            },
-            onProfileTap: () {
-              profileController.showImagePickerOptions();
-            },
-          ),
-
+       // Header
+Obx(() => ExploreHeader(
+  userName: profileController.profileData.value?.fullName ?? 'Guest',
+  location: 'Los Angeles, USA',
+  onSearchTap: () {
+    // Navigate to search tab
+    navController.changeTab(1);
+  },
+  onNotificationTap: () {
+    // TODO: Implement notifications
+  },
+  onProfileTap: () {
+    profileController.showImagePickerOptions();
+  },
+)),
           // Scrollable content
           Expanded(
             child: SingleChildScrollView(
