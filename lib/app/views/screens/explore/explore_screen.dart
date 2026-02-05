@@ -17,28 +17,52 @@ class ExploreTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(ExploreController());
     final navController = Get.find<NavController>();
-        final profileController = Get.put(ProfileController());
+    final profileController = Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
           // Header
-       // Header
-Obx(() => ExploreHeader(
-  userName: profileController.profileData.value?.fullName ?? 'Guest',
-  location: 'Los Angeles, USA',
-  onSearchTap: () {
-    // Navigate to search tab
-    navController.changeTab(1);
-  },
-  onNotificationTap: () {
-    // TODO: Implement notifications
-  },
-  onProfileTap: () {
-    profileController.showImagePickerOptions();
-  },
-)),
+          // Header
+          Obx(() {
+            final profileData = profileController.profileData.value;
+            String location = 'Los Angeles, USA';
+
+            if (profileData != null) {
+              final addressLine = profileData.addressLineI ?? '';
+              final city = profileData.city ?? '';
+              final state = profileData.state ?? '';
+
+              // Build location string from API data
+              if (addressLine.isNotEmpty ||
+                  city.isNotEmpty ||
+                  state.isNotEmpty) {
+                final parts = <String>[];
+                if (addressLine.isNotEmpty) parts.add(addressLine);
+                if (city.isNotEmpty) parts.add(city);
+                if (state.isNotEmpty) parts.add(state);
+                location = parts.join(', ');
+                debugPrint('Explore: Location from API: $location');
+              }
+            }
+
+            return ExploreHeader(
+              userName:
+                  profileController.profileData.value?.fullName ?? 'Guest',
+              location: location,
+              onSearchTap: () {
+                // Navigate to search tab
+                navController.changeTab(1);
+              },
+              onNotificationTap: () {
+                // TODO: Implement notifications
+              },
+              onProfileTap: () {
+                profileController.showImagePickerOptions();
+              },
+            );
+          }),
           // Scrollable content
           Expanded(
             child: SingleChildScrollView(
@@ -128,7 +152,10 @@ Obx(() => ExploreHeader(
                             price: controller.formatProductPrice(product),
                             width: product.width,
                             length: product.length,
-                            onTap: () => controller.onProductTap(product.id, isBestDeal: true),
+                            onTap: () => controller.onProductTap(
+                              product.id,
+                              isBestDeal: true,
+                            ),
                             onAddTap: () => controller.onAddToCart(product),
                           );
                         },
