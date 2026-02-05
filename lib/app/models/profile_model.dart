@@ -72,4 +72,21 @@ class ProfileData{
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'full_name': fullName,
+      'email': email,
+      'phone': phone,
+      'image': image,
+      'latitude': latitude,
+      'longitude': longitude,
+      'country_or_region': countryOrRegion,
+      'address_line_i': addressLineI,
+      'address_line_ii': addressLineIi,
+      'suburb': suburb,
+      'city': city,
+      'postal_code': postalCode,
+      'state': state,
+    };
+  }
 }

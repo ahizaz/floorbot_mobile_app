@@ -207,32 +207,71 @@ class ProfileController extends GetxController {
     try {
       EasyLoading.show(status: 'Updating profile...');
       debugPrint('ProfileController: Updating profile data');
+      debugPrint('ProfileController: URL: ${Urls.updateProfile}');
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access') ?? '';
+      debugPrint('ProfileController: Authorization Token: Bearer $token');
 
-      final body = {
-        'full_name': fullName,
-        if (phone != null && phone.isNotEmpty) 'phone': phone,
-        if (countryOrRegion != null && countryOrRegion.isNotEmpty) 'country_or_region': countryOrRegion,
-        if (addressLineI != null && addressLineI.isNotEmpty) 'address_line_i': addressLineI,
-        if (addressLineIi != null && addressLineIi.isNotEmpty) 'address_line_ii': addressLineIi,
-        if (suburb != null && suburb.isNotEmpty) 'suburb': suburb,
-        if (city != null && city.isNotEmpty) 'city': city,
-        if (postalCode != null && postalCode.isNotEmpty) 'postal_code': postalCode,
-        if (state != null && state.isNotEmpty) 'state': state,
-      };
-
-      debugPrint('ProfileController: Request body: $body');
-
-      final response = await http.patch(
+      // Create multipart request
+      var request = http.MultipartRequest(
+        'PATCH',
         Uri.parse(Urls.updateProfile),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      ).timeout(const Duration(seconds: 30));
+      );
+
+      // Add authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields
+      request.fields['full_name'] = fullName;
+      debugPrint('ProfileController: full_name = $fullName');
+      
+      if (phone != null && phone.isNotEmpty) {
+        request.fields['phone'] = phone;
+        debugPrint('ProfileController: phone = $phone');
+      }
+      
+      if (countryOrRegion != null && countryOrRegion.isNotEmpty) {
+        request.fields['country_or_region'] = countryOrRegion;
+        debugPrint('ProfileController: country_or_region = $countryOrRegion');
+      }
+      
+      if (addressLineI != null && addressLineI.isNotEmpty) {
+        request.fields['address_line_i'] = addressLineI;
+        debugPrint('ProfileController: address_line_i = $addressLineI');
+      }
+      
+      if (addressLineIi != null && addressLineIi.isNotEmpty) {
+        request.fields['address_line_ii'] = addressLineIi;
+        debugPrint('ProfileController: address_line_ii = $addressLineIi');
+      }
+      
+      if (suburb != null && suburb.isNotEmpty) {
+        request.fields['suburb'] = suburb;
+        debugPrint('ProfileController: suburb = $suburb');
+      }
+      
+      if (city != null && city.isNotEmpty) {
+        request.fields['city'] = city;
+        debugPrint('ProfileController: city = $city');
+      }
+      
+      if (postalCode != null && postalCode.isNotEmpty) {
+        request.fields['postal_code'] = postalCode;
+        debugPrint('ProfileController: postal_code = $postalCode');
+      }
+      
+      if (state != null && state.isNotEmpty) {
+        request.fields['state'] = state;
+        debugPrint('ProfileController: state = $state');
+      }
+
+      debugPrint('ProfileController: Sending PATCH request with multipart form data...');
+      debugPrint('ProfileController: Request fields: ${request.fields}');
+
+      // Send request
+      final streamedResponse = await request.send().timeout(const Duration(seconds: 30));
+      final response = await http.Response.fromStream(streamedResponse);
 
       debugPrint('ProfileController: PATCH Status Code: ${response.statusCode}');
       debugPrint('ProfileController: PATCH Response Body: ${response.body}');
@@ -241,23 +280,31 @@ class ProfileController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = jsonDecode(response.body);
+        debugPrint('ProfileController: Response JSON: $jsonData');
+        
         final profileModel = ProfileModel.fromJson(jsonData);
         profileData.value = profileModel.profileData;
         
         EasyLoading.showSuccess('Profile updated successfully!');
         debugPrint('ProfileController: Profile updated successfully');
+        debugPrint('ProfileController: Updated profile - Name: ${profileData.value?.fullName}, Email: ${profileData.value?.email}');
       } else {
         String errorMsg = 'Failed to update profile';
         try {
           final errorJson = jsonDecode(response.body);
           errorMsg = errorJson['message'] ?? errorMsg;
-        } catch (_) {}
+          debugPrint('ProfileController: Error message from server: $errorMsg');
+        } catch (_) {
+          debugPrint('ProfileController: Could not parse error response');
+        }
         EasyLoading.showError(errorMsg);
         debugPrint('ProfileController: Failed to update profile: $errorMsg');
       }
     } catch (e) {
       EasyLoading.dismiss();
-      debugPrint('ProfileController: Error updating profile: $e');
+      debugPrint('ProfileController: Exception occurred while updating profile');
+      debugPrint('ProfileController: Error: $e');
+      debugPrint('ProfileController: Error type: ${e.runtimeType}');
       EasyLoading.showError('Error: $e');
     }
   }
