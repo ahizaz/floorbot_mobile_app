@@ -1,5 +1,6 @@
 import 'package:floor_bot_mobile/app/controllers/explore_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/nav_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/calculator_test_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/explore_header.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/category_card.dart';
@@ -16,6 +17,7 @@ class ExploreTab extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(ExploreController());
     final navController = Get.find<NavController>();
+        final profileController = Get.put(ProfileController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -33,7 +35,7 @@ class ExploreTab extends StatelessWidget {
               // TODO: Implement notifications
             },
             onProfileTap: () {
-              // TODO: Implement profile
+              profileController.showImagePickerOptions();
             },
           ),
 

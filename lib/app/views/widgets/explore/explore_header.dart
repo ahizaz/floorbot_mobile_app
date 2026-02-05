@@ -1,6 +1,10 @@
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/src/extension_instance.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 
 class ExploreHeader extends StatelessWidget {
   final String userName;
@@ -78,22 +82,35 @@ class ExploreHeader extends StatelessWidget {
                       size: 24.sp,
                     ),
                   ),
-                  IconButton(
-                    onPressed: onProfileTap,
-                    icon: Container(
-                      width: 32.w,
-                      height: 32.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
+                        Obx(() {
+                    final profileController = Get.find<ProfileController>();
+                    final imageUrl = profileController.profileImageUrl;
+                    
+                    return IconButton(
+                      onPressed: onProfileTap,
+                      icon: Container(
+                        width: 32.w,
+                        height: 32.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          image: imageUrl != null
+                              ? DecorationImage(
+                                  image: NetworkImage(imageUrl),
+                                  fit: BoxFit.cover,
+                                )
+                              : null,
+                        ),
+                        child: imageUrl == null
+                            ? Icon(
+                                Icons.person,
+                                color: AppColors.primaryColor,
+                                size: 20.sp,
+                              )
+                            : null,
                       ),
-                      child: Icon(
-                        Icons.person,
-                        color: AppColors.primaryColor,
-                        size: 20.sp,
-                      ),
-                    ),
-                  ),
+                    );
+                  }),
                 ],
               ),
             ],
