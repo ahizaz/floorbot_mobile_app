@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:floor_bot_mobile/app/views/screens/shipping/shipping_address_screen.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +12,7 @@ class CheckoutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<CartController>();
+    final profileController = Get.find<ProfileController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -92,7 +94,9 @@ class CheckoutView extends StatelessWidget {
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12.r),
-                                child: _buildCartItemImage(controller.cartItems.first),
+                                child: _buildCartItemImage(
+                                  controller.cartItems.first,
+                                ),
                               ),
                             ),
 
@@ -183,12 +187,22 @@ class CheckoutView extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 8.h),
-                        Text(
-                          'Alex Morgan',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black87,
+                        // Text(
+                        //   'Alex Morgan',
+                        //   style: TextStyle(
+                        //     fontSize: 16.sp,
+                        //     fontWeight: FontWeight.w600,
+                        //     color: Colors.black87,
+                        //   ),
+                        // ),
+                        Obx(
+                          () => Text(
+                            profileController.profileData.value?.fullName ?? '',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
                           ),
                         ),
                         SizedBox(height: 12.h),
@@ -202,14 +216,47 @@ class CheckoutView extends StatelessWidget {
                             ),
                             SizedBox(width: 8.w),
                             Expanded(
-                              child: Text(
-                                '1248 Sunset View Dr, Apt 302, Los Angeles, CA 90026, USA',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  color: Colors.grey[700],
-                                  height: 1.5,
-                                ),
-                              ),
+                              child: Obx(() {
+                                final profile =
+                                    profileController.profileData.value;
+
+                                // Build address string from API data
+                                final addressParts = <String>[];
+
+                                if (profile?.addressLineI != null &&
+                                    profile!.addressLineI!.isNotEmpty) {
+                                  addressParts.add(profile.addressLineI!);
+                                }
+                                if (profile?.suburb != null &&
+                                    profile!.suburb!.isNotEmpty) {
+                                  addressParts.add(profile.suburb!);
+                                }
+                                if (profile?.city != null &&
+                                    profile!.city!.isNotEmpty) {
+                                  addressParts.add(profile.city!);
+                                }
+                                if (profile?.countryOrRegion != null &&
+                                    profile!.countryOrRegion!.isNotEmpty) {
+                                  addressParts.add(profile.countryOrRegion!);
+                                }
+                                if (profile?.postalCode != null &&
+                                    profile!.postalCode!.isNotEmpty) {
+                                  addressParts.add(profile.postalCode!);
+                                }
+
+                                final address = addressParts.isNotEmpty
+                                    ? addressParts.join(', ')
+                                    : '1248 Sunset View Dr, Apt 302, Los Angeles, CA 90026, USA';
+
+                                return Text(
+                                  address,
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    color: Colors.grey[700],
+                                    height: 1.5,
+                                  ),
+                                );
+                              }),
                             ),
                           ],
                         ),
@@ -384,7 +431,7 @@ class CheckoutView extends StatelessWidget {
   Widget _buildCartItemImage(dynamic item) {
     final imageUrl = item.imageUrl;
     final imageAsset = item.imageAsset;
-    
+
     String? fullImageUrl;
     if (imageUrl != null) {
       if (imageUrl.startsWith('http')) {
@@ -394,7 +441,7 @@ class CheckoutView extends StatelessWidget {
         fullImageUrl = '$baseUrlWithoutApi$imageUrl';
       }
     }
-    
+
     if (fullImageUrl != null) {
       return Image.network(
         fullImageUrl,
@@ -405,7 +452,7 @@ class CheckoutView extends StatelessWidget {
             child: CircularProgressIndicator(
               value: loadingProgress.expectedTotalBytes != null
                   ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
+                        loadingProgress.expectedTotalBytes!
                   : null,
               strokeWidth: 2,
             ),
@@ -424,7 +471,7 @@ class CheckoutView extends StatelessWidget {
         },
       );
     }
-    
+
     return Icon(Icons.image, size: 60.sp, color: Colors.grey);
   }
 }

@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ShippingAddress {
   final String fullName;
@@ -159,46 +165,122 @@ class ShippingAddressController extends GetxController {
     isLoading.value = true;
 
     try {
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      EasyLoading.show(status: 'Saving address...');
+      debugPrint('ShippingAddressController: Saving shipping address');
+      debugPrint('ShippingAddressController: URL: ${Urls.updateProfile}');
 
-      final shippingAddress = ShippingAddress(
-        fullName: fullNameController.text.trim(),
-        phone: phoneController.text.trim(),
-        addressLine1: addressLine1Controller.text.trim(),
-        addressLine2: addressLine2Controller.text.trim(),
-        city: cityController.text.trim(),
-        state: stateController.text.trim(),
-        postalCode: postalCodeController.text.trim(),
-        country: countryController.text.trim(),
-        deliveryInstructions: deliveryInstructionsController.text.trim(),
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+      debugPrint('ShippingAddressController: Authorization Token: Bearer $token');
+
+      // Create multipart request
+      var request = http.MultipartRequest(
+        'PATCH',
+        Uri.parse(Urls.updateProfile),
       );
 
-      // Save to storage if requested
-      if (saveAddress.value) {
-        // TODO: Save to local storage or database
+      // Add authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add form fields
+      request.fields['full_name'] = fullNameController.text.trim();
+      debugPrint('ShippingAddressController: full_name = ${fullNameController.text.trim()}');
+
+      request.fields['phone'] = phoneController.text.trim();
+      debugPrint('ShippingAddressController: phone = ${phoneController.text.trim()}');
+
+      request.fields['country_or_region'] = countryController.text.trim();
+      debugPrint('ShippingAddressController: country_or_region = ${countryController.text.trim()}');
+
+      request.fields['address_line_i'] = addressLine1Controller.text.trim();
+      debugPrint('ShippingAddressController: address_line_i = ${addressLine1Controller.text.trim()}');
+
+      request.fields['address_line_ii'] = addressLine2Controller.text.trim();
+      debugPrint('ShippingAddressController: address_line_ii = ${addressLine2Controller.text.trim()}');
+
+      request.fields['suburb'] = deliveryInstructionsController.text.trim();
+      debugPrint('ShippingAddressController: suburb = ${deliveryInstructionsController.text.trim()}');
+
+      request.fields['city'] = cityController.text.trim();
+      debugPrint('ShippingAddressController: city = ${cityController.text.trim()}');
+
+      request.fields['postal_code'] = postalCodeController.text.trim();
+      debugPrint('ShippingAddressController: postal_code = ${postalCodeController.text.trim()}');
+
+      request.fields['state'] = stateController.text.trim();
+      debugPrint('ShippingAddressController: state = ${stateController.text.trim()}');
+
+      request.fields['delivery_instructions'] = deliveryInstructionsController.text.trim();
+      debugPrint('ShippingAddressController: delivery_instructions = ${deliveryInstructionsController.text.trim()}');
+
+      debugPrint(
+        'ShippingAddressController: Sending PATCH request with multipart form data...',
+      );
+      debugPrint('ShippingAddressController: Request fields: ${request.fields}');
+
+      // Send request
+      final streamedResponse = await request.send().timeout(
+        const Duration(seconds: 30),
+      );
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint(
+        'ShippingAddressController: PATCH Status Code: ${response.statusCode}',
+      );
+      debugPrint('ShippingAddressController: PATCH Response Body: ${response.body}');
+
+      EasyLoading.dismiss();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        debugPrint('ShippingAddressController: Response JSON: $jsonData');
+
+        final shippingAddress = ShippingAddress(
+          fullName: fullNameController.text.trim(),
+          phone: phoneController.text.trim(),
+          addressLine1: addressLine1Controller.text.trim(),
+          addressLine2: addressLine2Controller.text.trim(),
+          city: cityController.text.trim(),
+          state: stateController.text.trim(),
+          postalCode: postalCodeController.text.trim(),
+          country: countryController.text.trim(),
+          deliveryInstructions: deliveryInstructionsController.text.trim(),
+        );
+
+        // Refresh profile data to get updated address
+        try {
+          final profileController = Get.find<ProfileController>();
+          await profileController.fetchProfileData();
+          debugPrint('ShippingAddressController: Profile data refreshed successfully');
+        } catch (e) {
+          debugPrint('ShippingAddressController: Error refreshing profile: $e');
+        }
+
+        EasyLoading.showSuccess('Shipping address saved successfully!');
+        debugPrint('ShippingAddressController: Address saved successfully');
+
+        // Navigate back to checkout with the address
+        Get.back(result: shippingAddress);
+      } else {
+        String errorMsg = 'Failed to save address';
+        try {
+          final errorJson = jsonDecode(response.body);
+          errorMsg = errorJson['message'] ?? errorMsg;
+          debugPrint('ShippingAddressController: Error message from server: $errorMsg');
+        } catch (_) {
+          debugPrint('ShippingAddressController: Could not parse error response');
+        }
+        EasyLoading.showError(errorMsg);
+        debugPrint('ShippingAddressController: Failed to save address: $errorMsg');
       }
-
-      // Show success message
-      Get.snackbar(
-        'Success',
-        'Shipping address saved successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 2),
-      );
-
-      // Navigate back to checkout with the address
-      Get.back(result: shippingAddress);
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to save address. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      EasyLoading.dismiss();
+      debugPrint(
+        'ShippingAddressController: Exception occurred while saving address',
       );
+      debugPrint('ShippingAddressController: Error: $e');
+      debugPrint('ShippingAddressController: Error type: ${e.runtimeType}');
+      EasyLoading.showError('Error: $e');
     } finally {
       isLoading.value = false;
     }
