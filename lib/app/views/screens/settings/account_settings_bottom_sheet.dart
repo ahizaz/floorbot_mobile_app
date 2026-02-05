@@ -25,9 +25,16 @@ class _AccountSettingsBottomSheetState
   final _zipController = TextEditingController(text: '49008-5347');
   final _countryController = TextEditingController(text: 'United States');
 
-  // Edit mode states
-  bool _isEditingPersonal = false;
-  bool _isEditingAddress = false;
+  // Save handler
+  void _handleSave() {
+    Get.snackbar(
+      'Success',
+      'Changes saved successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    );
+  }
 
   @override
   void dispose() {
@@ -54,12 +61,13 @@ class _AccountSettingsBottomSheetState
       ),
       child: Column(
         children: [
-          // Header with back button
+          // Header with back button and save button
           SafeArea(
             bottom: false,
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   InkWell(
                     onTap: () => Get.back(),
@@ -79,6 +87,28 @@ class _AccountSettingsBottomSheetState
                           ),
                         ),
                       ],
+                    ),
+                  ),
+                  // Save button
+                  GestureDetector(
+                    onTap: _handleSave,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 20.w,
+                        vertical: 10.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.green,
+                        borderRadius: BorderRadius.circular(20.r),
+                      ),
+                      child: Text(
+                        'Save',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -117,47 +147,14 @@ class _AccountSettingsBottomSheetState
                   SizedBox(height: 32.h),
 
                   // PERSONAL DETAILS Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'PERSONAL DETAILS',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isEditingPersonal = !_isEditingPersonal;
-                            if (!_isEditingPersonal) {
-                              // Save changes
-                              Get.snackbar(
-                                'Success',
-                                'Personal details saved',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            }
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          _isEditingPersonal ? 'Save' : 'Edit',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'PERSONAL DETAILS',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[500],
+                      letterSpacing: 0.5,
+                    ),
                   ),
                   SizedBox(height: 16.h),
 
@@ -165,7 +162,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'Display Name',
                     controller: _displayNameController,
-                    enabled: _isEditingPersonal,
+                    enabled: true,
                   ),
                   SizedBox(height: 20.h),
 
@@ -173,7 +170,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'Email',
                     controller: _emailController,
-                    enabled: _isEditingPersonal,
+                    enabled: true,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   SizedBox(height: 20.h),
@@ -189,47 +186,14 @@ class _AccountSettingsBottomSheetState
                   SizedBox(height: 32.h),
 
                   // DELIVERY ADDRESS Section
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'DELIVERY ADDRESS',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.grey[500],
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _isEditingAddress = !_isEditingAddress;
-                            if (!_isEditingAddress) {
-                              // Save changes
-                              Get.snackbar(
-                                'Success',
-                                'Delivery address saved',
-                                snackPosition: SnackPosition.BOTTOM,
-                              );
-                            }
-                          });
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: const Size(0, 0),
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Text(
-                          _isEditingAddress ? 'Save' : 'Edit',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
+                  Text(
+                    'DELIVERY ADDRESS',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[500],
+                      letterSpacing: 0.5,
+                    ),
                   ),
                   SizedBox(height: 16.h),
 
@@ -237,7 +201,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'Street',
                     controller: _streetController,
-                    enabled: _isEditingAddress,
+                    enabled: true,
                   ),
                   SizedBox(height: 20.h),
 
@@ -245,7 +209,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'City',
                     controller: _cityController,
-                    enabled: _isEditingAddress,
+                    enabled: true,
                   ),
                   SizedBox(height: 20.h),
 
@@ -253,7 +217,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'ZIP',
                     controller: _zipController,
-                    enabled: _isEditingAddress,
+                    enabled: true,
                   ),
                   SizedBox(height: 20.h),
 
@@ -261,7 +225,7 @@ class _AccountSettingsBottomSheetState
                   _buildEditableField(
                     label: 'Country',
                     controller: _countryController,
-                    enabled: _isEditingAddress,
+                    enabled: true,
                   ),
                   SizedBox(height: 40.h),
                 ],
@@ -306,7 +270,7 @@ class _AccountSettingsBottomSheetState
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: controller.text.isEmpty ? Colors.grey[400] : Colors.black,
+              color: Colors.black,
             ),
             decoration: InputDecoration(
               hintText: placeholder,
