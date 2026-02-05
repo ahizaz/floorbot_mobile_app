@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'package:floor_bot_mobile/app/models/cart_item.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/views/screens/cart/checkout_view.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CartController extends GetxController {
   final RxList<CartItem> _cartItems = <CartItem>[].obs;
+  static const String _cartKey = 'cart_items';
 
   List<CartItem> get cartItems => _cartItems;
 
@@ -22,31 +27,56 @@ class CartController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Add some sample items for testing
-    _addSampleItems();
+    _loadCartFromStorage();
   }
 
-  void _addSampleItems() {
-    _cartItems.addAll([
-      CartItem(
-        id: '1',
-        productId: '1',
-        name: 'Parquet wooden flooring tiles',
-        imageAsset: 'assets/images/parquet.png',
-        price: 24.99,
-        size: '4x4 Sqr. m.',
-        quantity: 1,
-      ),
-      CartItem(
-        id: '2',
-        productId: '2',
-        name: 'Parquet wooden flooring tiles',
-        imageAsset: 'assets/images/parquet.png',
-        price: 24.99,
-        size: '4x4 Sqr. m.',
-        quantity: 1,
-      ),
-    ]);
+  // Load cart from SharedPreferences
+  Future<void> _loadCartFromStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = prefs.getString(_cartKey);
+
+      if (cartJson != null) {
+        final List<dynamic> cartList = jsonDecode(cartJson);
+        final items = cartList
+            .map((item) => CartItem.fromJson(item))
+            .where(
+              (item) => !item.isExpired,
+            ) // Filter out expired items (24+ hours)
+            .toList();
+
+        _cartItems.assignAll(items);
+
+        // If any items were expired, save the filtered list
+        if (items.length != cartList.length) {
+          await _saveCartToStorage();
+          debugPrint(
+            'CartController: Removed ${cartList.length - items.length} expired items',
+          );
+        }
+
+        debugPrint('CartController: Loaded ${items.length} items from storage');
+      } else {
+        debugPrint('CartController: No saved cart found, starting fresh');
+      }
+    } catch (e) {
+      debugPrint('CartController: Error loading cart from storage: $e');
+    }
+  }
+
+  // Save cart to SharedPreferences
+  Future<void> _saveCartToStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cartJson = jsonEncode(
+        _cartItems.map((item) => item.toJson()).toList(),
+      );
+      await prefs.setString(_cartKey, cartJson);
+      debugPrint('CartController: Saved ${_cartItems.length} items to storage');
+    } catch (e) {
+      debugPrint('CartController: Error saving cart to storage: $e');
+      EasyLoading.showError('Failed to save cart');
+    }
   }
 
   void addToCart(
@@ -79,6 +109,9 @@ class CartController extends GetxController {
       );
     }
 
+    // Save to storage
+    _saveCartToStorage();
+
     // Only show snackbar if requested (for quick add from product list)
     if (showSnackbar) {
       Get.snackbar(
@@ -95,6 +128,7 @@ class CartController extends GetxController {
     if (index != -1) {
       _cartItems[index].quantity++;
       _cartItems.refresh();
+      _saveCartToStorage();
     }
   }
 
@@ -103,11 +137,13 @@ class CartController extends GetxController {
     if (index != -1 && _cartItems[index].quantity > 1) {
       _cartItems[index].quantity--;
       _cartItems.refresh();
+      _saveCartToStorage();
     }
   }
 
   void removeItem(String itemId) {
     _cartItems.removeWhere((item) => item.id == itemId);
+    _saveCartToStorage();
 
     Get.snackbar(
       'Removed',
@@ -119,6 +155,7 @@ class CartController extends GetxController {
 
   void clearCart() {
     _cartItems.clear();
+    _saveCartToStorage();
   }
 
   void proceedToCheckout() {

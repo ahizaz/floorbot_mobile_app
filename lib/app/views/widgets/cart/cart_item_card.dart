@@ -65,9 +65,10 @@ class CartItemCard extends StatelessWidget {
                             if (loadingProgress == null) return child;
                             return Center(
                               child: CircularProgressIndicator(
-                                value: loadingProgress.expectedTotalBytes != null
+                                value:
+                                    loadingProgress.expectedTotalBytes != null
                                     ? loadingProgress.cumulativeBytesLoaded /
-                                        loadingProgress.expectedTotalBytes!
+                                          loadingProgress.expectedTotalBytes!
                                     : null,
                                 strokeWidth: 2,
                               ),
@@ -82,22 +83,18 @@ class CartItemCard extends StatelessWidget {
                           },
                         )
                       : item.imageAsset != null
-                          ? Image.asset(
-                              item.imageAsset!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Icon(
-                                  Icons.image,
-                                  size: 40.sp,
-                                  color: Colors.grey,
-                                );
-                              },
-                            )
-                          : Icon(
+                      ? Image.asset(
+                          item.imageAsset!,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
                               Icons.image,
                               size: 40.sp,
                               color: Colors.grey,
-                            ),
+                            );
+                          },
+                        )
+                      : Icon(Icons.image, size: 40.sp, color: Colors.grey),
                 ),
               ),
 
@@ -184,7 +181,11 @@ class CartItemCard extends StatelessWidget {
                           color: Colors.grey[300],
                         ),
                         GestureDetector(
-                          onTap: onIncrement,
+                          onTap: () {
+                            // Navigate to checkout when plus is clicked
+                            final cartController = Get.find<CartController>();
+                            cartController.proceedToCheckout();
+                          },
                           child: Container(
                             padding: EdgeInsets.symmetric(
                               horizontal: 12.w,

@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/app_images.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
@@ -6,6 +7,7 @@ import 'package:floor_bot_mobile/app/views/screens/products/products_details.dar
 import 'package:floor_bot_mobile/app/views/screens/products/best_deals_product_details.dart';
 import 'package:floor_bot_mobile/app/views/screens/products/all_products_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/category/category_products_screen.dart';
+import 'package:floor_bot_mobile/app/views/screens/cart/my_cart_view.dart';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -34,42 +36,50 @@ class ExploreController extends GetxController {
     try {
       isLoadingCategories.value = true;
       EasyLoading.show(status: 'Loading categories...');
-      
-      debugPrint('ExploreController: Fetching categories from ${Urls.catagories}');
-      
+
+      debugPrint(
+        'ExploreController: Fetching categories from ${Urls.catagories}',
+      );
+
       // Get bearer token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access') ?? '';
       debugPrint('ExploreController: Token: $token');
-      
+
       // Make API call with bearer token
-      final response = await http.get(
-        Uri.parse(Urls.catagories),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 30));
-      
+      final response = await http
+          .get(
+            Uri.parse(Urls.catagories),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
       debugPrint('ExploreController: Status Code: ${response.statusCode}');
       debugPrint('ExploreController: Response Body: ${response.body}');
-      
+
       EasyLoading.dismiss();
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = jsonDecode(response.body);
         debugPrint('ExploreController: Parsed JSON: $jsonData');
-        
+
         if (jsonData['success'] == true && jsonData['categories'] != null) {
           final List<dynamic> categoriesJson = jsonData['categories'];
-          debugPrint('ExploreController: Categories count: ${categoriesJson.length}');
-          
+          debugPrint(
+            'ExploreController: Categories count: ${categoriesJson.length}',
+          );
+
           // Map JSON to Category objects
           categories.value = categoriesJson
               .map((json) => Category.fromJson(json))
               .toList();
-          
-          debugPrint('ExploreController: Successfully loaded ${categories.length} categories');
+
+          debugPrint(
+            'ExploreController: Successfully loaded ${categories.length} categories',
+          );
           EasyLoading.showSuccess('Categories loaded!');
         } else {
           debugPrint('ExploreController: Invalid response format');
@@ -77,7 +87,9 @@ class ExploreController extends GetxController {
           EasyLoading.showError('Failed to load categories');
         }
       } else {
-        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        debugPrint(
+          'ExploreController: Failed with status ${response.statusCode}',
+        );
         _loadDefaultCategories();
         EasyLoading.showError('Failed to fetch categories');
       }
@@ -106,42 +118,54 @@ class ExploreController extends GetxController {
   Future<void> _fetchNewArrivalsFromAPI() async {
     try {
       EasyLoading.show(status: 'Loading products...');
-      
-      debugPrint('ExploreController: Fetching new arrivals from ${Urls.newProduct}');
-      
+
+      debugPrint(
+        'ExploreController: Fetching new arrivals from ${Urls.newProduct}',
+      );
+
       // Get bearer token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access') ?? '';
       debugPrint('ExploreController: Token: $token');
-      
+
       // Make API call with bearer token
-      final response = await http.get(
-        Uri.parse(Urls.newProduct),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 30));
-      
-      debugPrint('ExploreController: New Arrivals Status Code: ${response.statusCode}');
-      debugPrint('ExploreController: New Arrivals Response Body: ${response.body}');
-      
+      final response = await http
+          .get(
+            Uri.parse(Urls.newProduct),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
+      debugPrint(
+        'ExploreController: New Arrivals Status Code: ${response.statusCode}',
+      );
+      debugPrint(
+        'ExploreController: New Arrivals Response Body: ${response.body}',
+      );
+
       EasyLoading.dismiss();
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = jsonDecode(response.body);
         debugPrint('ExploreController: Parsed JSON: $jsonData');
-        
+
         if (jsonData['success'] == true && jsonData['data'] != null) {
           final List<dynamic> productsJson = jsonData['data'];
-          debugPrint('ExploreController: Products count: ${productsJson.length}');
-          
+          debugPrint(
+            'ExploreController: Products count: ${productsJson.length}',
+          );
+
           // Map JSON to Product objects
           newArrivals.value = productsJson
               .map((json) => Product.fromJson(json))
               .toList();
-          
-          debugPrint('ExploreController: Successfully loaded ${newArrivals.length} new arrival products');
+
+          debugPrint(
+            'ExploreController: Successfully loaded ${newArrivals.length} new arrival products',
+          );
           EasyLoading.showSuccess('Products loaded!');
         } else {
           debugPrint('ExploreController: Invalid response format for products');
@@ -149,7 +173,9 @@ class ExploreController extends GetxController {
           EasyLoading.showError('Failed to load products');
         }
       } else {
-        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        debugPrint(
+          'ExploreController: Failed with status ${response.statusCode}',
+        );
         _loadDefaultNewArrivals();
         EasyLoading.showError('Failed to fetch products');
       }
@@ -216,50 +242,66 @@ class ExploreController extends GetxController {
   Future<void> _fetchBestDealsFromAPI() async {
     try {
       EasyLoading.show(status: 'Loading best deals...');
-      
-      debugPrint('ExploreController: Fetching best deals from ${Urls.bestDeals}');
-      
+
+      debugPrint(
+        'ExploreController: Fetching best deals from ${Urls.bestDeals}',
+      );
+
       // Get bearer token from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access') ?? '';
       debugPrint('ExploreController: Token: $token');
-      
+
       // Make API call with bearer token
-      final response = await http.get(
-        Uri.parse(Urls.bestDeals),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      ).timeout(const Duration(seconds: 30));
-      
-      debugPrint('ExploreController: Best Deals Status Code: ${response.statusCode}');
-      debugPrint('ExploreController: Best Deals Response Body: ${response.body}');
-      
+      final response = await http
+          .get(
+            Uri.parse(Urls.bestDeals),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+          )
+          .timeout(const Duration(seconds: 30));
+
+      debugPrint(
+        'ExploreController: Best Deals Status Code: ${response.statusCode}',
+      );
+      debugPrint(
+        'ExploreController: Best Deals Response Body: ${response.body}',
+      );
+
       EasyLoading.dismiss();
-      
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         final jsonData = jsonDecode(response.body);
         debugPrint('ExploreController: Parsed JSON: $jsonData');
-        
+
         if (jsonData['success'] == true && jsonData['data'] != null) {
           final List<dynamic> productsJson = jsonData['data'];
-          debugPrint('ExploreController: Best deals count: ${productsJson.length}');
-          
+          debugPrint(
+            'ExploreController: Best deals count: ${productsJson.length}',
+          );
+
           // Map JSON to Product objects
           bestDeals.value = productsJson
               .map((json) => Product.fromJson(json))
               .toList();
-          
-          debugPrint('ExploreController: Successfully loaded ${bestDeals.length} best deals products');
+
+          debugPrint(
+            'ExploreController: Successfully loaded ${bestDeals.length} best deals products',
+          );
           EasyLoading.showSuccess('Best deals loaded!');
         } else {
-          debugPrint('ExploreController: Invalid response format for best deals');
+          debugPrint(
+            'ExploreController: Invalid response format for best deals',
+          );
           _loadDefaultBestDeals();
           EasyLoading.showError('Failed to load best deals');
         }
       } else {
-        debugPrint('ExploreController: Failed with status ${response.statusCode}');
+        debugPrint(
+          'ExploreController: Failed with status ${response.statusCode}',
+        );
         _loadDefaultBestDeals();
         EasyLoading.showError('Failed to fetch best deals');
       }
@@ -371,12 +413,19 @@ class ExploreController extends GetxController {
   }
 
   void onAddToCart(Product product) {
-    // TODO: Add to cart logic
-    Get.snackbar(
-      'Cart',
-      '${product.name} added to cart!',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Get or create cart controller
+    CartController cartController;
+    try {
+      cartController = Get.find<CartController>();
+    } catch (e) {
+      cartController = Get.put(CartController());
+    }
+
+    // Add product to cart (will save to SharedPreferences automatically)
+    cartController.addToCart(product, quantity: 1);
+
+    // Navigate to My Cart view
+    Get.to(() => const MyCartView(), transition: Transition.cupertino);
   }
 
   void onShowAllNewArrivals() {
