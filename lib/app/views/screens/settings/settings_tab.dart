@@ -1,5 +1,6 @@
 import 'package:floor_bot_mobile/app/controllers/order_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/orders/order_details_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/account_settings_bottom_sheet.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/reset_password_bottom_sheet.dart';
@@ -15,6 +16,7 @@ class SettingsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final orderController = Get.put(OrderController());
+       final profileController = Get.put(ProfileController()); 
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -34,11 +36,12 @@ class SettingsTab extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
+                    
+                             Obx(() => Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Hi, Sebastien',
+                                'Hi, ${profileController.profileData.value?.fullName ?? 'Guest'}',
                                 style: TextStyle(
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
@@ -55,7 +58,7 @@ class SettingsTab extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          ),
+                          )),
                           InkWell(
                             onTap: () {
                               // Handle logout

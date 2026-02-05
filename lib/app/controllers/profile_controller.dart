@@ -191,4 +191,74 @@ class ProfileController extends GetxController {
       ),
     );
   }
+
+  // Update Profile Data (excluding image)
+  Future<void> updateProfileData({
+    required String fullName,
+    String? phone,
+    String? countryOrRegion,
+    String? addressLineI,
+    String? addressLineIi,
+    String? suburb,
+    String? city,
+    String? postalCode,
+    String? state,
+  }) async {
+    try {
+      EasyLoading.show(status: 'Updating profile...');
+      debugPrint('ProfileController: Updating profile data');
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+
+      final body = {
+        'full_name': fullName,
+        if (phone != null && phone.isNotEmpty) 'phone': phone,
+        if (countryOrRegion != null && countryOrRegion.isNotEmpty) 'country_or_region': countryOrRegion,
+        if (addressLineI != null && addressLineI.isNotEmpty) 'address_line_i': addressLineI,
+        if (addressLineIi != null && addressLineIi.isNotEmpty) 'address_line_ii': addressLineIi,
+        if (suburb != null && suburb.isNotEmpty) 'suburb': suburb,
+        if (city != null && city.isNotEmpty) 'city': city,
+        if (postalCode != null && postalCode.isNotEmpty) 'postal_code': postalCode,
+        if (state != null && state.isNotEmpty) 'state': state,
+      };
+
+      debugPrint('ProfileController: Request body: $body');
+
+      final response = await http.patch(
+        Uri.parse(Urls.updateProfile),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      ).timeout(const Duration(seconds: 30));
+
+      debugPrint('ProfileController: PATCH Status Code: ${response.statusCode}');
+      debugPrint('ProfileController: PATCH Response Body: ${response.body}');
+
+      EasyLoading.dismiss();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final jsonData = jsonDecode(response.body);
+        final profileModel = ProfileModel.fromJson(jsonData);
+        profileData.value = profileModel.profileData;
+        
+        EasyLoading.showSuccess('Profile updated successfully!');
+        debugPrint('ProfileController: Profile updated successfully');
+      } else {
+        String errorMsg = 'Failed to update profile';
+        try {
+          final errorJson = jsonDecode(response.body);
+          errorMsg = errorJson['message'] ?? errorMsg;
+        } catch (_) {}
+        EasyLoading.showError(errorMsg);
+        debugPrint('ProfileController: Failed to update profile: $errorMsg');
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      debugPrint('ProfileController: Error updating profile: $e');
+      EasyLoading.showError('Error: $e');
+    }
+  }
 }

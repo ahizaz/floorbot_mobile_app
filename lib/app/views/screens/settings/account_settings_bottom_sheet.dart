@@ -1,3 +1,4 @@
+import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -12,28 +13,66 @@ class AccountSettingsBottomSheet extends StatefulWidget {
 
 class _AccountSettingsBottomSheetState
     extends State<AccountSettingsBottomSheet> {
+  final profileController = Get.find<ProfileController>();
+  
   // Controllers for personal details
-  final _displayNameController = TextEditingController(text: 'Alex Morgan');
-  final _emailController = TextEditingController(
-    text: 'alexmorgan97@gmail.com',
-  );
-  final _phoneController = TextEditingController();
+  late final TextEditingController _displayNameController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _phoneController;
 
   // Controllers for delivery address
-  final _streetController = TextEditingController(text: '1903 W Michigan Ave');
-  final _cityController = TextEditingController(text: 'Kalamazoo');
-  final _zipController = TextEditingController(text: '49008-5347');
-  final _countryController = TextEditingController(text: 'United States');
+  late final TextEditingController _streetController;
+  late final TextEditingController _cityController;
+  late final TextEditingController _zipController;
+  late final TextEditingController _countryController;
+  late final TextEditingController _suburbController;
+  late final TextEditingController _stateController;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Initialize controllers with data from ProfileController
+    final profile = profileController.profileData.value;
+    
+    _displayNameController = TextEditingController(text: profile?.fullName ?? '');
+    _emailController = TextEditingController(text: profile?.email ?? '');
+    _phoneController = TextEditingController(text: profile?.phone ?? '');
+    _streetController = TextEditingController(text: profile?.addressLineI ?? '');
+    _cityController = TextEditingController(text: profile?.city ?? '');
+    _zipController = TextEditingController(text: profile?.postalCode ?? '');
+    _countryController = TextEditingController(text: profile?.countryOrRegion ?? '');
+    _suburbController = TextEditingController(text: profile?.suburb ?? '');
+    _stateController = TextEditingController(text: profile?.state ?? '');
+  }
 
   // Save handler
-  void _handleSave() {
-    Get.snackbar(
-      'Success',
-      'Changes saved successfully',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
+  void _handleSave() async {
+    if (_displayNameController.text.trim().isEmpty) {
+      Get.snackbar(
+        'Error',
+        'Display name cannot be empty',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    await profileController.updateProfileData(
+      fullName: _displayNameController.text.trim(),
+      phone: _phoneController.text.trim(),
+      countryOrRegion: _countryController.text.trim(),
+      addressLineI: _streetController.text.trim(),
+      addressLineIi: '', // Not used in this UI
+      suburb: _suburbController.text.trim(),
+      city: _cityController.text.trim(),
+      postalCode: _zipController.text.trim(),
+      state: _stateController.text.trim(),
     );
+    
+    // Close bottom sheet after successful update
+    Get.back();
   }
 
   @override
@@ -45,6 +84,8 @@ class _AccountSettingsBottomSheetState
     _cityController.dispose();
     _zipController.dispose();
     _countryController.dispose();
+    _suburbController.dispose();
+    _stateController.dispose();
     super.dispose();
   }
 
@@ -166,11 +207,11 @@ class _AccountSettingsBottomSheetState
                   ),
                   SizedBox(height: 20.h),
 
-                  // Email
+                  // Email (Read-only)
                   _buildEditableField(
                     label: 'Email',
                     controller: _emailController,
-                    enabled: true,
+                    enabled: false, // Read-only
                     keyboardType: TextInputType.emailAddress,
                   ),
                   SizedBox(height: 20.h),
@@ -205,10 +246,26 @@ class _AccountSettingsBottomSheetState
                   ),
                   SizedBox(height: 20.h),
 
+                  // Suburb
+                  _buildEditableField(
+                    label: 'Suburb',
+                    controller: _suburbController,
+                    enabled: true,
+                  ),
+                  SizedBox(height: 20.h),
+
                   // City
                   _buildEditableField(
                     label: 'City',
                     controller: _cityController,
+                    enabled: true,
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // State
+                  _buildEditableField(
+                    label: 'State',
+                    controller: _stateController,
                     enabled: true,
                   ),
                   SizedBox(height: 20.h),
@@ -259,9 +316,12 @@ class _AccountSettingsBottomSheetState
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: enabled ? Colors.grey[50] : Colors.grey[100],
             borderRadius: BorderRadius.circular(12.r),
-            border: Border.all(color: Colors.grey[200]!, width: 1),
+            border: Border.all(
+              color: enabled ? Colors.grey[200]! : Colors.grey[300]!,
+              width: 1,
+            ),
           ),
           child: TextField(
             controller: controller,
@@ -270,7 +330,7 @@ class _AccountSettingsBottomSheetState
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.w400,
-              color: Colors.black,
+              color: enabled ? Colors.black : Colors.grey[600],
             ),
             decoration: InputDecoration(
               hintText: placeholder,
