@@ -1,6 +1,7 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
+import 'package:floor_bot_mobile/app/views/screens/payment/payment_method_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/shipping/shipping_address_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -325,7 +326,12 @@ class CheckoutView extends StatelessWidget {
             ),
             child: SafeArea(
               child: ElevatedButton(
-                onPressed: () {},
+                onPressed: () {
+                  Get.to(
+                    () => const PaymentMethodScreen(),
+                    transition: Transition.cupertino,
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF2C3E50),
                   foregroundColor: Colors.white,
