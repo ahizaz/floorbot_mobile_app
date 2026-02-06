@@ -324,66 +324,30 @@ class CheckoutView extends StatelessWidget {
               ],
             ),
             child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () async {
-                    // First check if we need to collect shipping address
-                    final result = await Get.to(
-                      () => const ShippingAddressScreen(),
-                      transition: Transition.cupertino,
-                    );
-
-                    if (result != null) {
-                      // Address collected successfully, proceed to payment
-                      Get.snackbar(
-                        'Success',
-                        'Proceeding to payment...',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
-
-                      // Here you would typically navigate to payment screen
-                      // For now, we'll just show a success message
-                      await Future.delayed(const Duration(seconds: 1));
-
-                      Get.snackbar(
-                        'Order Placed',
-                        'Your order has been placed successfully!',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green,
-                        colorText: Colors.white,
-                      );
-
-                      // Navigate back to main app
-                      Get.back(); // Go back to cart
-                      Get.back(); // Go back to explore/main screen
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2C3E50),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(vertical: 16.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(50.r),
-                    ),
-                    elevation: 0,
+              child: ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2C3E50),
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50.r),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.local_shipping_outlined, size: 20.sp),
-                      SizedBox(width: 8.w),
-                      Text(
-                        'Enter Shipping Address',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
+                  elevation: 0,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 20.sp),
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Go For Payment',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
