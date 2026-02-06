@@ -2,6 +2,7 @@ import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
 import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:floor_bot_mobile/app/models/product_calculator_config.dart';
+import 'package:floor_bot_mobile/app/views/screens/cart/checkout_view.dart';
 import 'package:floor_bot_mobile/app/views/widgets/product_details/add_to_cart_success_modal.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -215,12 +216,18 @@ class ProductDetailsController extends GetxController {
   }
 
   void buyNow() {
-    Get.snackbar(
-      'Buy Now',
-      'Proceeding to checkout...',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+    // Add product to cart
+    try {
+      final cartController = Get.find<CartController>();
+      cartController.addToCart(product, quantity: quantity.value);
+    } catch (e) {
+      // If cart controller doesn't exist, create it
+      final cartController = Get.put(CartController());
+      cartController.addToCart(product, quantity: quantity.value);
+    }
+
+    // Navigate to checkout
+    Get.to(() => const CheckoutView());
   }
 
   void share() {
