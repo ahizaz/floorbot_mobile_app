@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:floor_bot_mobile/app/models/payment_response_model.dart';
 import 'package:flutter/material.dart';
@@ -152,6 +153,15 @@ class CheckoutController extends GetxController {
 
       debugPrint('CheckoutController: Payment completed successfully');
       EasyLoading.showSuccess('Payment successful!');
+
+      // Clear cart after successful payment
+      try {
+        final cartController = Get.find<CartController>();
+        cartController.clearCart();
+        debugPrint('CheckoutController: Cart cleared successfully');
+      } catch (e) {
+        debugPrint('CheckoutController: Error clearing cart: $e');
+      }
 
       // Navigate to success screen or order confirmation
       Get.snackbar(

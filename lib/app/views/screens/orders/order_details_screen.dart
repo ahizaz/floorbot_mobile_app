@@ -90,13 +90,24 @@ class OrderDetailsScreen extends StatelessWidget {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(12.r),
-              child: Image.asset(
-                order.imageAsset,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Icon(Icons.image, size: 40.w, color: Colors.grey[400]);
-                },
-              ),
+             child: order.imageAsset.startsWith('http') || order.imageAsset.startsWith('/api')
+  ? Image.network(
+      order.imageAsset.startsWith('/api') 
+        ? 'http://10.10.12.15:8089${order.imageAsset}' 
+        : order.imageAsset,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        debugPrint('Image load error: $error');
+        return Icon(Icons.image, size: 40.w, color: Colors.grey[400]);
+      },
+    )
+  : Image.asset(
+      order.imageAsset,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        return Icon(Icons.image, size: 40.w, color: Colors.grey[400]);
+      },
+    ),
             ),
           ),
           SizedBox(width: 12.w),

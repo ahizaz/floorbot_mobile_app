@@ -103,6 +103,53 @@ class Order {
       orderDate: orderDate ?? this.orderDate,
     );
   }
+
+  // API response থেকে Order object create করার জন্য
+  factory Order.fromJson(Map<String, dynamic> json) {
+    final product = json['product'];
+    
+    // API থেকে status string কে OrderStatus enum এ convert করো
+    OrderStatus orderStatus;
+    final statusString = json['status']?.toString().toLowerCase() ?? 'placed';
+    
+    switch (statusString) {
+      case 'placed':
+        orderStatus = OrderStatus.placed;
+        break;
+      case 'processing':
+        orderStatus = OrderStatus.processing;
+        break;
+      case 'in_transit':
+      case 'in transit':
+        orderStatus = OrderStatus.inTransit;
+        break;
+      case 'delivered':
+        orderStatus = OrderStatus.delivered;
+        break;
+      case 'cancelled':
+        orderStatus = OrderStatus.cancelled;
+        break;
+      default:
+        orderStatus = OrderStatus.placed;
+    }
+    
+    return Order(
+      id: '#${json['id']}',
+      productId: product['id'].toString(),
+      productName: product['product_title'] ?? 'Unknown Product',
+      imageAsset: product['primary_image'] ?? '',
+      size: '${product['length'] ?? '0'}x${product['width'] ?? '0'} (${product['thickness'] ?? '0'}mm)',
+      unitPrice: double.tryParse(product['sale_price']?.toString() ?? '0') ?? 0.0,
+      quantity: json['quantity'] ?? 1,
+      deliveryFee: double.tryParse(json['delivery_fee']?.toString() ?? '0') ?? 0.0,
+      tax: double.tryParse(json['tax_fee']?.toString() ?? '0') ?? 0.0,
+      status: orderStatus,
+      paymentMethod: 'Credit Card',
+      cardNumber: '****',
+      cardExpiry: '',
+      orderDate: DateTime.now(),
+    );
+  }
 }
 
 enum OrderStatus { placed, processing, inTransit, delivered, cancelled }

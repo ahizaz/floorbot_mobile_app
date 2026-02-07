@@ -224,17 +224,33 @@ class _OrdersTabState extends State<OrdersTab>
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12.r),
-                  child: Image.asset(
-                    imageAsset,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Icon(
-                        Icons.image,
-                        size: 40.w,
-                        color: Colors.grey[400],
-                      );
-                    },
-                  ),
+                  child:
+                      imageAsset.startsWith('http') ||
+                          imageAsset.startsWith('/api')
+                      ? Image.network(
+                          imageAsset.startsWith('/api')
+                              ? 'http://10.10.12.15:8089$imageAsset'
+                              : imageAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.image,
+                              size: 40.w,
+                              color: Colors.grey[400],
+                            );
+                          },
+                        )
+                      : Image.asset(
+                          imageAsset,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.image,
+                              size: 40.w,
+                              color: Colors.grey[400],
+                            );
+                          },
+                        ),
                 ),
               ),
               SizedBox(width: 12.w),

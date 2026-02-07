@@ -1,5 +1,13 @@
+import 'dart:convert';
+
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:floor_bot_mobile/app/models/order.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderController extends GetxController {
   final RxList<Order> _orders = <Order>[].obs;
@@ -17,45 +25,103 @@ class OrderController extends GetxController {
   void onInit() {
     super.onInit();
     // Add sample orders for testing
-    _addSampleOrders();
+   fetchOrders();
   }
 
-  void _addSampleOrders() {
-    _orders.addAll([
-      Order(
-        id: '#NGJ357596',
-        productId: '1',
-        productName: 'Parquet wooden flooring tiles',
-        imageAsset: 'assets/images/parquet.png',
-        size: '4x4 Sqr. m.',
-        unitPrice: 24.99,
-        quantity: 1,
-        deliveryFee: 10.00,
-        tax: 1.00,
-        status: OrderStatus.placed,
-        paymentMethod: 'Credit Card',
-        cardNumber: '2585',
-        cardExpiry: '12/27',
-        orderDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      Order(
-        id: '#NGJ357597',
-        productId: '2',
-        productName: 'Parquet wooden flooring tiles',
-        imageAsset: 'assets/images/parquet.png',
-        size: '4x4 Sqr. m.',
-        unitPrice: 24.99,
-        quantity: 1,
-        deliveryFee: 10.00,
-        tax: 1.00,
-        status: OrderStatus.inTransit,
-        paymentMethod: 'Credit Card',
-        cardNumber: '2585',
-        cardExpiry: '12/27',
-        orderDate: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-    ]);
+  // void _addSampleOrders() {
+  //   _orders.addAll([
+  //     Order(
+  //       id: '#NGJ357596',
+  //       productId: '1',
+  //       productName: 'Parquet wooden flooring tiles',
+  //       imageAsset: 'assets/images/parquet.png',
+  //       size: '4x4 Sqr. m.',
+  //       unitPrice: 24.99,
+  //       quantity: 1,
+  //       deliveryFee: 10.00,
+  //       tax: 1.00,
+  //       status: OrderStatus.placed,
+  //       paymentMethod: 'Credit Card',
+  //       cardNumber: '2585',
+  //       cardExpiry: '12/27',
+  //       orderDate: DateTime.now().subtract(const Duration(days: 2)),
+  //     ),
+  //     Order(
+  //       id: '#NGJ357597',
+  //       productId: '2',
+  //       productName: 'Parquet wooden flooring tiles',
+  //       imageAsset: 'assets/images/parquet.png',
+  //       size: '4x4 Sqr. m.',
+  //       unitPrice: 24.99,
+  //       quantity: 1,
+  //       deliveryFee: 10.00,
+  //       tax: 1.00,
+  //       status: OrderStatus.inTransit,
+  //       paymentMethod: 'Credit Card',
+  //       cardNumber: '2585',
+  //       cardExpiry: '12/27',
+  //       orderDate: DateTime.now().subtract(const Duration(days: 5)),
+  //     ),
+  //   ]);
+  // }
+   Future<void> fetchOrders() async {
+  try {
+    EasyLoading.show(status: 'Loading orders...');
+    
+    // Get token from SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access') ?? '';
+    
+    debugPrint('OrderController: Token: $token');
+    debugPrint('OrderController: Fetching orders from ${Urls.userOrders}');
+    
+    // API call
+    final response = await http.get(
+      Uri.parse(Urls.userOrders),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 30));
+    
+    debugPrint('OrderController: Status Code: ${response.statusCode}');
+    debugPrint('OrderController: Response Body: ${response.body}');
+    
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      
+      if (jsonData['success'] == true && jsonData['data'] != null) {
+        final List<dynamic> ordersData = jsonData['data'];
+        
+        // Clear existing orders
+        _orders.clear();
+        
+        // Parse and add orders
+        for (var orderJson in ordersData) {
+          try {
+            final order = Order.fromJson(orderJson);
+            _orders.add(order);
+            debugPrint('OrderController: Added order ${order.id}');
+          } catch (e) {
+            debugPrint('OrderController: Error parsing order: $e');
+          }
+        }
+        
+        debugPrint('OrderController: Total orders loaded: ${_orders.length}');
+        EasyLoading.dismiss();
+      } else {
+        debugPrint('OrderController: Invalid response format');
+        EasyLoading.showError('Failed to load orders');
+      }
+    } else {
+      debugPrint('OrderController: Failed with status ${response.statusCode}');
+      EasyLoading.showError('Failed to load orders');
+    }
+  } catch (e) {
+    debugPrint('OrderController: Error fetching orders: $e');
+    EasyLoading.showError('Error: $e');
   }
+}
 
   void selectOrder(Order order) {
     _selectedOrder.value = order;

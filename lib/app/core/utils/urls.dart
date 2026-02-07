@@ -14,7 +14,7 @@ class Urls{
   static String searchProducts(String query) => "$baseUrl/users/products/?search=$query";
   static const String updateProfile = "$baseUrl/users/profile-data/";
   static const String confirmorders = "$baseUrl/users/orders/";
-
+   static const String userOrders = "$baseUrl/users/orders/";
  
   
 

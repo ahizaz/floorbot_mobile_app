@@ -2,7 +2,7 @@ import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/checkout_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
-import 'package:floor_bot_mobile/app/views/screens/payment/payment_method_screen.dart';
+
 import 'package:floor_bot_mobile/app/views/screens/shipping/shipping_address_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
