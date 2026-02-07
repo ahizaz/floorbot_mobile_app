@@ -13,6 +13,7 @@ class Urls{
   //static const String search ="$baseUrl/users/products/?search=soft carpet";
   static String searchProducts(String query) => "$baseUrl/users/products/?search=$query";
   static const String updateProfile = "$baseUrl/users/profile-data/";
+  static const String confirmorders = "$baseUrl/users/orders/";
 
  
   

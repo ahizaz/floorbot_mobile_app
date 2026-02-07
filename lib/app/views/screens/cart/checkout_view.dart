@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/checkout_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:floor_bot_mobile/app/views/screens/payment/payment_method_screen.dart';
@@ -14,6 +15,7 @@ class CheckoutView extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<CartController>();
     final profileController = Get.find<ProfileController>();
+    final checkoutController = Get.put(CheckoutController());
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -326,10 +328,58 @@ class CheckoutView extends StatelessWidget {
             ),
             child: SafeArea(
               child: ElevatedButton(
-                onPressed: () {
-                  Get.to(
-                    () => const PaymentMethodScreen(),
-                    transition: Transition.cupertino,
+                onPressed: () async {
+                  // Validate cart and profile data
+                  if (controller.cartItems.isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'Your cart is empty',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  final profile = profileController.profileData.value;
+                  if (profile == null) {
+                    Get.snackbar(
+                      'Error',
+                      'Profile data not available',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  // Validate address data
+                  if (profile.countryOrRegion == null ||
+                      profile.countryOrRegion!.isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'Please complete your delivery address',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  // Get first cart item (assuming single item checkout for now)
+                  final cartItem = controller.cartItems.first;
+
+                  // Create order and initiate payment
+                  await checkoutController.createOrder(
+                    productId: cartItem.productId,
+                    qty: cartItem.quantity,
+                    countryOrRegion: profile.countryOrRegion ?? 'Bangladesh',
+                    addressLineI: profile.addressLineI ?? 'N/A',
+                    addressLineIi: profile.addressLineIi,
+                    suburb: profile.suburb ?? 'N/A',
+                    city: profile.city ?? 'N/A',
+                    postalCode: profile.postalCode ?? '0000',
+                    state: profile.state ?? 'N/A',
                   );
                 },
                 style: ElevatedButton.styleFrom(
