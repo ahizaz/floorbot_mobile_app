@@ -15,6 +15,7 @@ class Urls{
   static const String updateProfile = "$baseUrl/users/profile-data/";
   static const String confirmorders = "$baseUrl/users/orders/";
    static const String userOrders = "$baseUrl/users/orders/";
+   static const String confirmDelivery = "$baseUrl/users/orders/";
  
   
 

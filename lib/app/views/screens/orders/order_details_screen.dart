@@ -1,3 +1,4 @@
+import 'package:floor_bot_mobile/app/models/order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -245,51 +246,7 @@ class OrderDetailsScreen extends StatelessWidget {
             isTotal: true,
           ),
           SizedBox(height: 24.h),
-          // Payment details section
-          Text(
-            'Payment details',
-            style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-          ),
-          SizedBox(height: 12.h),
-          // Credit card info
-          Row(
-            children: [
-              Text(
-                order.paymentMethod,
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-              ),
-              SizedBox(width: 8.w),
-              // Mastercard icon
-              Container(
-                width: 24.w,
-                height: 16.h,
-                decoration: BoxDecoration(
-                  color: Colors.red,
-                  borderRadius: BorderRadius.circular(2.r),
-                ),
-                child: Center(
-                  child: Icon(
-                    Icons.credit_card,
-                    size: 12.sp,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                'Visa...${order.cardNumber}',
-                style: theme.textTheme.bodyMedium?.copyWith(fontSize: 14.sp),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                'Exp: ${order.cardExpiry}',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 14.sp,
-                  color: Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+        
         ],
       ),
     );
@@ -347,6 +304,9 @@ class OrderDetailsScreen extends StatelessWidget {
 
   Widget _buildBottomButton(BuildContext context, order) {
     final orderController = Get.find<OrderController>();
+     if (order.status != OrderStatus.inTransit) {
+    return const SizedBox.shrink(); // Button hide
+  }
 
     return Container(
       padding: EdgeInsets.all(16.w),
