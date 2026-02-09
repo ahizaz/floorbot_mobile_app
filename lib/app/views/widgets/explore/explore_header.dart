@@ -1,10 +1,9 @@
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/notification_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_instance/src/extension_instance.dart';
-import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get.dart';
 
 class ExploreHeader extends StatelessWidget {
   final String userName;
@@ -77,15 +76,60 @@ class ExploreHeader extends StatelessWidget {
                     onPressed: onSearchTap,
                     icon: Icon(Icons.search, color: Colors.white, size: 24.sp),
                   ),
-                  IconButton(
-                    onPressed: onNotificationTap,
-                    icon: Icon(
-                      Icons.notifications_outlined,
-                      color: Colors.white,
-                      size: 24.sp,
-                    ),
+                  // Notification icon with badge
+                  GetX<NotificationController>(
+                    builder: (notifController) {
+                      return Stack(
+                        clipBehavior: Clip.none,
+                        children: [
+                          IconButton(
+                            onPressed: onNotificationTap,
+                            icon: Icon(
+                              Icons.notifications_outlined,
+                              color: Colors.white,
+                              size: 30.sp,
+                            ),
+                          ),
+                          // Badge showing unseen count
+                          Positioned(
+                            right: 1,
+                            top: 1,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 1.w, vertical: 1.h),
+                              decoration: BoxDecoration(
+                                color: notifController.unseenCount.value > 0 ? Colors.red : Colors.grey[400],
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black26,
+                                    blurRadius: 2,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              constraints: BoxConstraints(
+                                minWidth: 20.w,
+                                minHeight: 18.h,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  notifController.unseenCount.value > 99 ? '99+' : notifController.unseenCount.value.toString(),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.bold,
+                                    height: 1,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                        Obx(() {
+                  Obx(() {
                     final profileController = Get.find<ProfileController>();
                     final imageUrl = profileController.profileImageUrl;
                     

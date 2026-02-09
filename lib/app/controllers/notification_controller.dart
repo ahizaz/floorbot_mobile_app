@@ -9,7 +9,8 @@ import 'package:floor_bot_mobile/app/core/services/notification_service.dart';
 class NotificationController extends GetxController {
   // Notification list
   final RxList<NotificationModel> notifications = <NotificationModel>[].obs;
-  
+  // Unseen notification count
+final RxInt unseenCount = 0.obs;
   // Loading state
   final RxBool isLoading = false.obs;
   
@@ -69,6 +70,9 @@ class NotificationController extends GetxController {
         
         // Add to the beginning of the list
         notifications.insert(0, notification);
+        
+        // Fetch updated unseen count from backend
+        fetchUnseenCount();
         
         // Show a snackbar
         Get.snackbar(
@@ -134,6 +138,9 @@ class NotificationController extends GetxController {
       
       debugPrint('NotificationController: Fetched ${result.length} notifications');
       
+      // Also fetch unseen count
+      await fetchUnseenCount();
+      
     } catch (e) {
       debugPrint('NotificationController: Error fetching notifications: $e');
       EasyLoading.showError('Failed to load notifications');
@@ -161,6 +168,7 @@ class NotificationController extends GetxController {
       default:
         return Icons.notifications;
     }
+    
   }
 
   // Get color for notification type
@@ -176,6 +184,31 @@ class NotificationController extends GetxController {
         return Colors.blue;
       default:
         return Colors.grey;
+    }
+  }
+
+  // Fetch unseen notification count
+  Future<void> fetchUnseenCount() async {
+    try {
+      if (_token == null || _token!.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        _token = prefs.getString('access');
+      }
+
+      if (_token == null || _token!.isEmpty) {
+        debugPrint('NotificationController: No token for unseen count');
+        return;
+      }
+
+      debugPrint('NotificationController: Fetching unseen count...');
+      
+      final count = await NotificationService.getUnseenNotificationCount(_token!);
+      unseenCount.value = count;
+      
+      debugPrint('NotificationController: Unseen count: $count');
+      
+    } catch (e) {
+      debugPrint('NotificationController: Error fetching unseen count: $e');
     }
   }
 }

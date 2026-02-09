@@ -1,4 +1,5 @@
 import 'package:floor_bot_mobile/app/controllers/currency_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/notification_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_themes.dart';
 import 'package:floor_bot_mobile/app/views/screens/initial_view/welcome_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize currency controller
     Get.put(CurrencyController());
+    
+    // Initialize notification controller for real-time socket connection
+    Get.put(NotificationController());
 
     return ScreenUtilInit(
       designSize: const Size(375, 812),

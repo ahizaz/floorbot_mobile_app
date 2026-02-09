@@ -47,4 +47,41 @@ class NotificationService {
       rethrow;
     }
   }
+  // Fetch unseen notification count
+  static Future<int> getUnseenNotificationCount(String token) async {
+    try {
+      debugPrint('NotificationService: Fetching unseen notification count...');
+      debugPrint('NotificationService: URL: ${Urls.unseenNotification}');
+
+      final response = await http.get(
+        Uri.parse(Urls.unseenNotification),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      debugPrint('NotificationService: Status Code: ${response.statusCode}');
+      debugPrint('NotificationService: Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        
+        if (jsonData['success'] == true) {
+          final unseenCount = jsonData['total_unseen_note'] ?? 0;
+          debugPrint('NotificationService: Unseen count: $unseenCount');
+          return unseenCount;
+        } else {
+          debugPrint('NotificationService: Invalid response format');
+          return 0;
+        }
+      } else {
+        debugPrint('NotificationService: Error ${response.statusCode}');
+        return 0;
+      }
+    } catch (e) {
+      debugPrint('NotificationService: Exception: $e');
+      return 0;
+    }
+  }
 }

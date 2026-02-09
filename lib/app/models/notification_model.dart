@@ -14,10 +14,10 @@ class NotificationModel {
   // Create from JSON
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
     return NotificationModel(
-      id: json['id'] as int,
-      title: json['title'] as String,
-      content: json['content'] as String,
-      noteType: json['note_type'] as String,
+      id: json['id'] as int? ?? 0,
+      title: json['title'] as String? ?? '',
+      content: json['content'] as String? ?? '',
+      noteType: json['note_type'] as String? ?? 'general',
     );
   }
 

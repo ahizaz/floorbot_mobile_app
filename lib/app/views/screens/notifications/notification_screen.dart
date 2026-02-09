@@ -3,8 +3,21 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/controllers/notification_controller.dart';
 
-class NotificationScreen extends StatelessWidget {
+class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
+
+  @override
+  State<NotificationScreen> createState() => _NotificationScreenState();
+}
+
+class _NotificationScreenState extends State<NotificationScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Refresh unseen count when screen opens
+    final controller = Get.find<NotificationController>();
+    controller.fetchUnseenCount();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,14 +32,38 @@ class NotificationScreen extends StatelessWidget {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: Text(
-          'Notifications',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 20.sp,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+        title: Obx(() {
+          final unseenCount = controller.unseenCount.value;
+          return Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Notifications',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: unseenCount > 0 ? Colors.red : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Text(
+                  unseenCount.toString(),
+                  style: TextStyle(
+                    color: unseenCount > 0 ? Colors.white : Colors.grey[600],
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
         centerTitle: true,
       ),
       body: Obx(() {
