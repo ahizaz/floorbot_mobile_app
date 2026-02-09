@@ -17,6 +17,7 @@ class Urls{
    static const String userOrders = "$baseUrl/users/orders/";
    static const String confirmDelivery = "$baseUrl/users/orders/";
    static const String feedBack = "$baseUrl/users/orders/";
+   static const String notification ="$baseUrl/chats/notifications/";
  
   
 

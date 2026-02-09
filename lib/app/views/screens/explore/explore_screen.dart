@@ -2,6 +2,7 @@ import 'package:floor_bot_mobile/app/controllers/explore_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/nav_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/calculator_test_screen.dart';
+import 'package:floor_bot_mobile/app/views/screens/notifications/notification_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/explore_header.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/category_card.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/product_card.dart';
@@ -56,7 +57,8 @@ class ExploreTab extends StatelessWidget {
                 navController.changeTab(1);
               },
               onNotificationTap: () {
-                // TODO: Implement notifications
+                // Navigate to notification screen
+                Get.to(() => NotificationScreen());
               },
               onProfileTap: () {
                 profileController.showImagePickerOptions();
