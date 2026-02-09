@@ -16,16 +16,40 @@ class _OrdersTabState extends State<OrdersTab>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final orderController = Get.put(OrderController());
+  late ScrollController _inProgressScrollController;
+  late ScrollController _completedScrollController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _inProgressScrollController = ScrollController();
+    _completedScrollController = ScrollController();
+
+    // Add scroll listeners for pagination
+    _inProgressScrollController.addListener(_onInProgressScroll);
+    _completedScrollController.addListener(_onCompletedScroll);
+  }
+
+  void _onInProgressScroll() {
+    if (_inProgressScrollController.position.pixels >=
+        _inProgressScrollController.position.maxScrollExtent - 200) {
+      orderController.loadMoreOrders();
+    }
+  }
+
+  void _onCompletedScroll() {
+    if (_completedScrollController.position.pixels >=
+        _completedScrollController.position.maxScrollExtent - 200) {
+      orderController.loadMoreOrders();
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _inProgressScrollController.dispose();
+    _completedScrollController.dispose();
     super.dispose();
   }
 
@@ -93,7 +117,7 @@ class _OrdersTabState extends State<OrdersTab>
     return Obx(() {
       final inProgressOrders = orderController.inProgressOrders;
 
-      if (inProgressOrders.isEmpty) {
+      if (inProgressOrders.isEmpty && !orderController.isLoadingMore.value) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -118,10 +142,23 @@ class _OrdersTabState extends State<OrdersTab>
       }
 
       return ListView.separated(
+        controller: _inProgressScrollController,
         padding: EdgeInsets.all(16.w),
-        itemCount: inProgressOrders.length,
+        itemCount:
+            inProgressOrders.length +
+            (orderController.hasMoreData.value ? 1 : 0),
         separatorBuilder: (context, index) => SizedBox(height: 16.h),
         itemBuilder: (context, index) {
+          // Show loading indicator at bottom
+          if (index == inProgressOrders.length) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
+              ),
+            );
+          }
+
           final order = inProgressOrders[index];
           return _buildOrderCard(
             orderId: order.id,
@@ -141,7 +178,7 @@ class _OrdersTabState extends State<OrdersTab>
     return Obx(() {
       final completedOrders = orderController.completedOrders;
 
-      if (completedOrders.isEmpty) {
+      if (completedOrders.isEmpty && !orderController.isLoadingMore.value) {
         return Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -166,10 +203,23 @@ class _OrdersTabState extends State<OrdersTab>
       }
 
       return ListView.separated(
+        controller: _completedScrollController,
         padding: EdgeInsets.all(16.w),
-        itemCount: completedOrders.length,
+        itemCount:
+            completedOrders.length +
+            (orderController.hasMoreData.value ? 1 : 0),
         separatorBuilder: (context, index) => SizedBox(height: 16.h),
         itemBuilder: (context, index) {
+          // Show loading indicator at bottom
+          if (index == completedOrders.length) {
+            return Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.h),
+                child: CircularProgressIndicator(color: AppColors.primaryColor),
+              ),
+            );
+          }
+
           final order = completedOrders[index];
           return _buildOrderCard(
             orderId: order.id,

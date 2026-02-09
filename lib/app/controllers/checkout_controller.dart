@@ -167,7 +167,7 @@ class CheckoutController extends GetxController {
       // Automatically fetch orders after successful payment
       try {
         final orderController = Get.find<OrderController>();
-        await orderController.fetchOrders();
+        await orderController.fetchOrders(page: 1, isRefresh: true);
         debugPrint(
           'CheckoutController: Orders fetched successfully after payment',
         );
