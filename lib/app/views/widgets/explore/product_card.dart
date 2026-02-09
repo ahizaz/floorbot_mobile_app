@@ -51,7 +51,7 @@ class ProductCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: .06),
               blurRadius: 8,
               offset: Offset(0, 2),
             ),
@@ -92,7 +92,7 @@ class ProductCard extends StatelessWidget {
                             return Image.asset(
                               imageAsset!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
+                              errorBuilder: (_, _, _) {
                                 return Icon(
                                   Icons.image,
                                   size: 48.sp,

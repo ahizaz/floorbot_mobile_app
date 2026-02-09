@@ -1,8 +1,9 @@
+import 'package:floor_bot_mobile/app/controllers/order_controller.dart';
 import 'package:floor_bot_mobile/app/models/order.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:floor_bot_mobile/app/controllers/order_controller.dart';
 
 class OrderDetailsScreen extends StatelessWidget {
   final String orderId;
@@ -474,41 +475,46 @@ class OrderDetailsScreen extends StatelessWidget {
                   SizedBox(width: 12.w),
 
                   // Submit button
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Handle feedback submission
-                        final feedback = feedbackController.text.trim();
-                        if (feedback.isNotEmpty) {
-                       
-                          Get.back();
-                          Get.snackbar(
-                            'Thank you!',
-                            'Your feedback has been submitted',
-                            snackPosition: SnackPosition.BOTTOM,
-                          );
-                        } else {
-                          Get.back();
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2D3142),
-                        foregroundColor: Colors.white,
-                        minimumSize: Size(double.infinity, 54.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Submit',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
+                 Expanded(
+  child: ElevatedButton(
+    onPressed: () async {
+      final feedback = feedbackController.text.trim();
+      if (feedback.isNotEmpty) {
+        // OrderController instance nao
+        final orderController = Get.find<OrderController>();
+        
+        // Bottom sheet close koro
+        Get.back();
+        
+        // Feedback submit koro (orderId laagbe, tai _showFeedbackBottomSheet e parameter pass korte hobe)
+        await orderController.submitFeedback(
+          orderId,  // Ei orderId _showFeedbackBottomSheet method e parameter hisebe nite hobe
+          feedback,
+          0.0,  // Rating if needed, nahole 0.0 diye dibe
+        );
+      } else {
+        // Validation error
+        EasyLoading.showError('Please enter your feedback');
+      }
+    },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: const Color(0xFF2D3142),
+      foregroundColor: Colors.white,
+      minimumSize: Size(double.infinity, 54.h),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      elevation: 0,
+    ),
+    child: Text(
+      'Submit',
+      style: TextStyle(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+  ),
+),
                 ],
               ),
             ],

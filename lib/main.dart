@@ -1,7 +1,6 @@
 import 'package:floor_bot_mobile/app/app.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:flutter_stripe/flutter_stripe.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +18,7 @@ void _configEasyLoading() {
     ..loadingStyle = EasyLoadingStyle.dark
     ..indicatorSize = 45.0
     ..radius = 10.0
-    ..maskColor = Colors.black.withOpacity(0.5)
+    ..maskColor = Colors.black.withValues(alpha: .5)
     ..userInteractions = false
     ..dismissOnTap = false;
 }

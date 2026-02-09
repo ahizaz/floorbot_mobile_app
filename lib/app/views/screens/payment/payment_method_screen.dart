@@ -266,7 +266,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                                 'assets/images/mastercard.png',
                                 width: 30.w,
                                 height: 20.h,
-                                errorBuilder: (_, __, ___) =>
+                                errorBuilder: (_, _, _) =>
                                     Icon(Icons.credit_card, size: 20.sp),
                               ),
                               SizedBox(width: 4.w),
@@ -274,7 +274,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                                 'assets/images/visa.png',
                                 width: 30.w,
                                 height: 20.h,
-                                errorBuilder: (_, __, ___) =>
+                                errorBuilder: (_, _, _) =>
                                     Icon(Icons.credit_card, size: 20.sp),
                               ),
                               SizedBox(width: 4.w),
@@ -282,7 +282,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
                                 'assets/images/amex.png',
                                 width: 30.w,
                                 height: 20.h,
-                                errorBuilder: (_, __, ___) =>
+                                errorBuilder: (_, _, _) =>
                                     Icon(Icons.credit_card, size: 20.sp),
                               ),
                             ],
@@ -661,7 +661,7 @@ class _PaymentMethodScreenState extends State<PaymentMethodScreen> {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: .05),
                   blurRadius: 10,
                   offset: Offset(0, -2),
                 ),

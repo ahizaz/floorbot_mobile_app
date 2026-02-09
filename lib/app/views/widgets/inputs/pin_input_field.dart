@@ -150,7 +150,7 @@ class _PinInputFieldState extends State<PinInputField> {
                     borderRadius: BorderRadius.circular(borderRadius),
                     borderSide: BorderSide(
                       color: widget.inactiveBorderColor ??
-                          theme.colorScheme.outline.withOpacity(0.3),
+                          theme.colorScheme.outline.withValues(alpha: .3),
                       width: borderWidth,
                     ),
                   ),

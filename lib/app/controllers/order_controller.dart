@@ -5,7 +5,6 @@ import 'package:floor_bot_mobile/app/models/order.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -180,6 +179,43 @@ class OrderController extends GetxController {
     EasyLoading.showError('Error: $e');
   }
    }
+     Future<void>submitFeedback(String orderId,String feedbackText,double rating)async{
+    try{
+      EasyLoading.show(status: 'Submitting feedback...');
+      debugPrint('OrderController :Submitting feedback for orderId $orderId');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access')??'';
+      debugPrint('OrderController :Token $token');
+      final cleanOrderId = orderId.replaceAll('#', '');
+      final body = jsonEncode({
+      "order_id":int.parse(cleanOrderId),
+      "feedback":feedbackText,
+      });
+      debugPrint('OrderController : Request Body :$body');
+      debugPrint('OrderController :API URL: ${Urls.feedBack}');
+      final response = await http.put( 
+     Uri.parse(Urls.feedBack),
+     headers: {
+      'Content-Type' : 'application/json',
+      'Authorization':'Bearer $token',
+     },
+     body: body,
+      ).timeout(const Duration(seconds: 30));
+      debugPrint('OrderController :Status Code :${response.statusCode}');
+      debugPrint('OrderController:Response Body:${response.body}');
+      if(response.statusCode==200 || response.statusCode==201){
+      EasyLoading.showSuccess('Feedback submitted successfully!');
+      debugPrint('OrderController: Feedback submitted successfully');
+      }else{
+      EasyLoading.showError('Failed to submit feedback');
+      debugPrint('OrderController: Failed with status ${response.statusCode}');
+      }
+      
+    }catch(e){
+     debugPrint('OrderController: Error submitting feedback: $e');
+    EasyLoading.showError('Error: $e');  
+    }
+  }
   void cancelOrder(String orderId) {
     final index = _orders.indexWhere((order) => order.id == orderId);
     if (index != -1) {
@@ -187,6 +223,8 @@ class OrderController extends GetxController {
       _orders.refresh();
     }
   }
+
+
 
   void addOrder(Order order) {
     _orders.insert(0, order);

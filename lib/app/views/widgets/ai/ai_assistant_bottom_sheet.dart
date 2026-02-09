@@ -28,7 +28,7 @@ class AiAssistantBottomSheet extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
+                  color: Colors.black.withValues(alpha: .05),
                   blurRadius: 4,
                   offset: Offset(0, 2),
                 ),

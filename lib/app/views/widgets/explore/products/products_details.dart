@@ -237,7 +237,7 @@ class ProductsDetails extends StatelessWidget {
               color: Colors.white,
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
+                  color: Colors.black.withValues(alpha: .08),
                   blurRadius: 8,
                   offset: Offset(0, -2),
                 ),

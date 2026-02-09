@@ -136,7 +136,7 @@ class ProductImageCarousel extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20.r),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
+                    color: Colors.black.withValues(alpha: .1),
                     blurRadius: 8,
                     offset: Offset(0, 2),
                   ),

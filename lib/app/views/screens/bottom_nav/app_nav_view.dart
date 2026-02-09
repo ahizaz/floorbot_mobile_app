@@ -184,7 +184,7 @@ class AppNavView extends StatelessWidget {
                 isSelected ? activeIcon : icon,
                 color: isSelected
                     ? theme.colorScheme.primary
-                    : theme.colorScheme.onSurface.withOpacity(0.6),
+                    : theme.colorScheme.onSurface.withValues(alpha: .6),
                 size: 26,
               ),
               const SizedBox(height: 4),
@@ -193,7 +193,7 @@ class AppNavView extends StatelessWidget {
                 style: theme.textTheme.labelSmall?.copyWith(
                   color: isSelected
                       ? theme.colorScheme.primary
-                      : theme.colorScheme.onSurface.withOpacity(0.6),
+                      : theme.colorScheme.onSurface.withValues(alpha: .6),
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   fontSize: 11,
                 ),

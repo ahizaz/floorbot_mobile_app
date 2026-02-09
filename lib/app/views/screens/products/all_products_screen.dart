@@ -46,7 +46,7 @@ class AllProductsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(12.r),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha: .06),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -72,7 +72,7 @@ class AllProductsScreen extends StatelessWidget {
                             return Image.asset(
                               product.imageAsset!,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) {
+                              errorBuilder: (_, _, _) {
                                 return Icon(Icons.image, size: 40.sp, color: Colors.grey);
                               },
                             );
@@ -84,7 +84,7 @@ class AllProductsScreen extends StatelessWidget {
                         ? Image.asset(
                             product.imageAsset!,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) {
+                            errorBuilder: (_, _, _) {
                               return Icon(Icons.image, size: 40.sp, color: Colors.grey);
                             },
                           )

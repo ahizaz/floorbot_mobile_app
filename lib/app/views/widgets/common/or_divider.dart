@@ -23,7 +23,7 @@ class OrDivider extends StatelessWidget {
       children: [
         Expanded(
           child: Divider(
-            color: lineColor ?? theme.dividerColor.withOpacity(0.2),
+            color: lineColor ?? theme.dividerColor.withValues(alpha: .2),
             thickness: thickness ?? 1,
           ),
         ),
@@ -32,14 +32,14 @@ class OrDivider extends StatelessWidget {
           child: Text(
             text,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: textColor ?? theme.colorScheme.onSurface.withOpacity(0.2),
+              color: textColor ?? theme.colorScheme.onSurface.withValues(alpha: .2),
               fontWeight: FontWeight.w400,
             ),
           ),
         ),
         Expanded(
           child: Divider(
-            color: lineColor ?? theme.dividerColor.withOpacity(0.2),
+            color: lineColor ?? theme.dividerColor.withValues(alpha: .2),
             thickness: thickness ?? 1,
           ),
         ),
