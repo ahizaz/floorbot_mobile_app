@@ -54,11 +54,14 @@ class ExploreHeader extends StatelessWidget {
                     SizedBox(height: 4.h),
                     Row(
                       children: [
-                        Text(
-                          location,
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.8),
-                            fontSize: 14.sp,
+                        Flexible(
+                          child: Text(
+                            location,
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.8),
+                              fontSize: 14.sp,
+                            ),
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ),
                         SizedBox(width: 4.w),

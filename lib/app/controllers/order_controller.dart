@@ -127,14 +127,59 @@ class OrderController extends GetxController {
     _selectedOrder.value = order;
   }
 
-  void markAsDelivered(String orderId) {
-    final index = _orders.indexWhere((order) => order.id == orderId);
-    if (index != -1) {
-      _orders[index] = _orders[index].copyWith(status: OrderStatus.delivered);
-      _orders.refresh();
-    }
-  }
+  // void markAsDelivered(String orderId) {
+  //   final index = _orders.indexWhere((order) => order.id == orderId);
+  //   if (index != -1) {
+  //     _orders[index] = _orders[index].copyWith(status: OrderStatus.delivered);
+  //     _orders.refresh();
+  //   }
+  // }
+   Future<void>markAsDelivered(String orderId)async{
+    try{
+      EasyLoading.show(status: 'Updating delivery status...');
+      debugPrint('OrderController:Marking order $orderId as delivered');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access')??'';
+      debugPrint('OrderController :Token $token');
+      final clearOrderId = orderId.replaceAll('#','');
+      final body =jsonEncode({
+       "order_id":int .parse(clearOrderId),
+       "delivary_status":"delivered"
 
+      });
+    debugPrint('OrderController: Request Body: $body');
+    debugPrint('OrderController: API URL: ${Urls.confirmDelivery}');
+    final response = await http.patch(
+         Uri.parse(Urls.confirmDelivery),
+         headers: {
+          'Content-Type':'application/json',
+          'Authorization':'Bearer $token',
+         },body: body,
+    ).timeout(const Duration(seconds: 30));
+       debugPrint('OrderController: Status Code: ${response.statusCode}');
+    debugPrint('OrderController: Response Body: ${response.body}');
+     if (response.statusCode == 200 || response.statusCode == 201) {
+      // Success - update local state
+      final index = _orders.indexWhere((order) => order.id == orderId);
+      if (index != -1) {
+        _orders[index] = _orders[index].copyWith(status: OrderStatus.delivered);
+        _orders.refresh();
+      }
+      
+      EasyLoading.showSuccess('Order marked as delivered!');
+      debugPrint('OrderController: Order successfully marked as delivered');
+    }
+     else {
+      EasyLoading.showError('Failed to update delivery status');
+      debugPrint('OrderController: Failed with status ${response.statusCode}');
+    }
+
+    }
+    catch (e) {
+    debugPrint('OrderController: Error marking as delivered: $e');
+    EasyLoading.showError('Error: $e');
+  }
+   }
   void cancelOrder(String orderId) {
     final index = _orders.indexWhere((order) => order.id == orderId);
     if (index != -1) {
