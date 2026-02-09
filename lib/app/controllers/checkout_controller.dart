@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:floor_bot_mobile/app/controllers/cart_controller.dart';
+import 'package:floor_bot_mobile/app/controllers/order_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:floor_bot_mobile/app/models/payment_response_model.dart';
 import 'package:flutter/material.dart';
@@ -161,6 +162,17 @@ class CheckoutController extends GetxController {
         debugPrint('CheckoutController: Cart cleared successfully');
       } catch (e) {
         debugPrint('CheckoutController: Error clearing cart: $e');
+      }
+
+      // Automatically fetch orders after successful payment
+      try {
+        final orderController = Get.find<OrderController>();
+        await orderController.fetchOrders();
+        debugPrint(
+          'CheckoutController: Orders fetched successfully after payment',
+        );
+      } catch (e) {
+        debugPrint('CheckoutController: Error fetching orders: $e');
       }
 
       // Navigate to success screen or order confirmation
