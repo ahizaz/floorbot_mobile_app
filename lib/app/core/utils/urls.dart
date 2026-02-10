@@ -25,4 +25,5 @@ class Urls {
   static const String unseenNotification =
       "$baseUrl/chats/unseen-notifications-count/";
   static const String supportmessage = "$baseUrl/chats/supports";
+  static const String sessionCreate = "$baseUrl/ai-fetures/session/create/";
 }

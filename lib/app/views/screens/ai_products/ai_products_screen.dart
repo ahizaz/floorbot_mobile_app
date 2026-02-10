@@ -7,47 +7,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-class AiProductsScreen extends StatefulWidget {
+class AiProductsScreen extends StatelessWidget {
   final String category;
 
   const AiProductsScreen({super.key, required this.category});
 
   @override
-  State<AiProductsScreen> createState() => _AiProductsScreenState();
-}
-
-class _AiProductsScreenState extends State<AiProductsScreen>
-    with TickerProviderStateMixin {
-  late AnimationController _rotationController;
-  late AnimationController _staggerController;
-
-  @override
-  void initState() {
-    super.initState();
-    _rotationController = AnimationController(
-      duration: const Duration(seconds: 4),
-      vsync: this,
-    )..repeat();
-
-    // Stagger animation controller for products
-    _staggerController = AnimationController(
-      duration: const Duration(milliseconds: 1200),
-      vsync: this,
-    )..forward();
-  }
-
-  @override
-  void dispose() {
-    _rotationController.dispose();
-    _staggerController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final controller = Get.put(
-      AiProductsController(category: widget.category),
-      tag: widget.category,
+      AiProductsController(category: category),
+      tag: category,
     );
 
     return Scaffold(
@@ -95,22 +64,19 @@ class _AiProductsScreenState extends State<AiProductsScreen>
                 ),
               ),
               SizedBox(height: 20.h),
-              // AI Icon - Centered with smooth rotation animation
-              RotationTransition(
-                turns: _rotationController,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7D54F9).withOpacity(0.2),
-                        blurRadius: 20,
-                        spreadRadius: 5,
-                      ),
-                    ],
-                  ),
-                  child: Image.asset(Utils.aiImage, width: 80.w, height: 80.h),
+              // AI Icon
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF7D54F9).withOpacity(0.2),
+                      blurRadius: 20,
+                      spreadRadius: 5,
+                    ),
+                  ],
                 ),
+                child: Image.asset(Utils.aiImage, width: 80.w, height: 80.h),
               ),
               SizedBox(height: 20.h),
               // Title
@@ -173,53 +139,15 @@ class _AiProductsScreenState extends State<AiProductsScreen>
         itemBuilder: (context, index) {
           final product = controller.filteredProducts[index];
 
-          // Calculate stagger delay for each item
-          final staggerDelay = index * 0.1; // 100ms delay between each item
-          final animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-            CurvedAnimation(
-              parent: _staggerController,
-              curve: Interval(
-                staggerDelay,
-                staggerDelay + 0.3,
-                curve: Curves.easeOut,
-              ),
-            ),
-          );
-
-          return AnimatedBuilder(
-            animation: animation,
-            builder: (context, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position:
-                      Tween<Offset>(
-                        begin: const Offset(0, 0.3),
-                        end: Offset.zero,
-                      ).animate(
-                        CurvedAnimation(
-                          parent: _staggerController,
-                          curve: Interval(
-                            staggerDelay,
-                            staggerDelay + 0.3,
-                            curve: Curves.easeOut,
-                          ),
-                        ),
-                      ),
-                  child: ProductCard(
-                    imageAsset: product.imageAsset,
-                    title: product.name,
-                    subtitle: product.description,
-                    price: controller.formatProductPrice(product),
-                    onTap: () {
-                      // TODO: Navigate to product details
-                      Get.to(ProductsDetails(product: product));
-                    },
-                    onAddTap: () => controller.addToCart(product),
-                  ),
-                ),
-              );
+          return ProductCard(
+            imageAsset: product.imageAsset,
+            title: product.name,
+            subtitle: product.description,
+            price: controller.formatProductPrice(product),
+            onTap: () {
+              Get.to(ProductsDetails(product: product));
             },
+            onAddTap: () => controller.addToCart(product),
           );
         },
       );
