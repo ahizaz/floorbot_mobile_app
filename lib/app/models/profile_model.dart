@@ -17,7 +17,7 @@ class ProfileModel {
     } else if (json['errors'] != null) {
       data = json['errors'];
     }
-    
+
     return ProfileModel(
       success: json['successs'] ?? json['success'] ?? false,
       message: json['message'] ?? '',
@@ -25,7 +25,9 @@ class ProfileModel {
     );
   }
 }
-class ProfileData{
+
+class ProfileData {
+  final int? id;
   final String fullName;
   final String email;
   final String? phone;
@@ -40,7 +42,8 @@ class ProfileData{
   final String? postalCode;
   final String? state;
   ProfileData({
-       required this.fullName,
+    this.id,
+    required this.fullName,
     required this.email,
     this.phone,
     this.image,
@@ -52,28 +55,30 @@ class ProfileData{
     this.suburb,
     this.city,
     this.postalCode,
-    this.state
+    this.state,
   });
-  factory ProfileData.fromJson(Map<String,dynamic>json){
+  factory ProfileData.fromJson(Map<String, dynamic> json) {
     return ProfileData(
-    fullName: json['full_name'] ?? '', 
-    email: json['email'] ?? '',
-    phone: json['phone'],
-    image: json['image'],
-    latitude: json['latitude'],
-    longitude: json['longitude'],
-    countryOrRegion: json['country_or_region'],
-    addressLineI: json['address_line_i'],
-    addressLineIi: json['address_line_ii'],
-    suburb: json['suburb'],
-    city: json['city'],
-    postalCode: json['postal_code'],
-    state: json['state'],
+      id: json['id'],
+      fullName: json['full_name'] ?? '',
+      email: json['email'] ?? '',
+      phone: json['phone'],
+      image: json['image'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      countryOrRegion: json['country_or_region'],
+      addressLineI: json['address_line_i'],
+      addressLineIi: json['address_line_ii'],
+      suburb: json['suburb'],
+      city: json['city'],
+      postalCode: json['postal_code'],
+      state: json['state'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'full_name': fullName,
       'email': email,
       'phone': phone,

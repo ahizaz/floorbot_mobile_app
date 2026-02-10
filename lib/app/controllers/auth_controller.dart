@@ -159,49 +159,73 @@ class AuthController extends GetxController {
     return true;
   }
 
-  
-  Future<void>signIn({bool validate =true})async{
-    if(validate && !validateForm())return;
+  Future<void> signIn({bool validate = true}) async {
+    if (validate && !validateForm()) return;
     final email = emailController.text.trim();
     final password = passwordController.text;
-    try{
+    try {
       EasyLoading.show(status: 'please wait....');
-      final body = jsonEncode({
-        'username':email,
-        'password':password,
-      });
+      final body = jsonEncode({'username': email, 'password': password});
       debugPrint('AuthController.signIn URL : ${Urls.signIn}');
       debugPrint('AuthController.singnIn body :$body');
-      final resp = await http.post(Uri.parse(Urls.signIn),
-      headers: {'Content-Type':'application/json'},
-      body: body,
-      ).timeout(const Duration(seconds: 30));
+      final resp = await http
+          .post(
+            Uri.parse(Urls.signIn),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
       debugPrint('AuthController.signIN status : ${resp.statusCode}');
       debugPrint('AuthController.singIn resp :${resp.body}');
       EasyLoading.dismiss();
-      if(resp.statusCode==200 || resp.statusCode==201){
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
         final parsed = jsonDecode(resp.body);
-        final success = parsed['success']==true;
-        if(success){
-          final token = parsed['access']??parsed['token']??'';
+        final success = parsed['success'] == true;
+        if (success) {
+          final token = parsed['access'] ?? parsed['token'] ?? '';
           final prefs = await SharedPreferences.getInstance();
           await prefs.setString('access', token);
-             EasyLoading.showSuccess(parsed['message'] ?? 'Login successful!');
-              clearForm();
-              Get.offAll(() => const AppNavView());
-                return;
 
+          // Save user data from response
+          if (parsed['user'] != null) {
+            final user = parsed['user'];
+            final userId = user['id'];
+            final fullName = user['full_name'] ?? '';
+            final image = user['image'];
 
+            // Save user ID (can be int or String in response)
+            if (userId is int) {
+              await prefs.setInt('user_id', userId);
+            } else if (userId is String) {
+              await prefs.setInt('user_id', int.parse(userId));
+            }
+
+            // Save user profile info
+            if (fullName.isNotEmpty) {
+              await prefs.setString('full_name', fullName);
+            }
+            if (image != null && image.toString().isNotEmpty) {
+              await prefs.setString('image', image.toString());
+            }
+
+            debugPrint('AuthController: ✅ Saved User ID: $userId');
+            debugPrint('AuthController: ✅ Saved User Name: $fullName');
+            debugPrint('AuthController: ✅ Saved User Image: $image');
+          }
+
+          EasyLoading.showSuccess(parsed['message'] ?? 'Login successful!');
+          clearForm();
+          Get.offAll(() => const AppNavView());
+          return;
         }
       }
       String message = resp.body;
-      try{
+      try {
         final parsed = jsonDecode(resp.body);
-        message = parsed['message']??parsed['error']??resp.body;
-      }catch (_) {}
-       EasyLoading.showError(message);
-    }
-    catch (e) {
+        message = parsed['message'] ?? parsed['error'] ?? resp.body;
+      } catch (_) {}
+      EasyLoading.showError(message);
+    } catch (e) {
       EasyLoading.dismiss();
       debugPrint('AuthController.signIn error: $e');
       EasyLoading.showError('Failed to sign in: ${e.toString()}');
@@ -232,9 +256,11 @@ class AuthController extends GetxController {
       debugPrint('AuthController.signUp body: $body');
 
       final resp = await http
-          .post(Uri.parse(Urls.signUp), headers: {
-        'Content-Type': 'application/json'
-      }, body: body)
+          .post(
+            Uri.parse(Urls.signUp),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
           .timeout(const Duration(seconds: 30));
 
       debugPrint('AuthController.signUp status: ${resp.statusCode}');
@@ -263,7 +289,9 @@ class AuthController extends GetxController {
             height: Get.height * 0.92,
             decoration: BoxDecoration(
               color: Get.theme.scaffoldBackgroundColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: Scaffold(
               backgroundColor: Colors.transparent,
@@ -407,20 +435,24 @@ class AuthController extends GetxController {
     try {
       EasyLoading.show(status: 'Please wait...');
 
-      final body = jsonEncode({
-        'email': email,
-      });
+      final body = jsonEncode({'email': email});
 
-      debugPrint('AuthController.sendVerificationCode URL: ${Urls.forgetPassword}');
+      debugPrint(
+        'AuthController.sendVerificationCode URL: ${Urls.forgetPassword}',
+      );
       debugPrint('AuthController.sendVerificationCode body: $body');
 
-      final resp = await http.post(
-        Uri.parse(Urls.forgetPassword),
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      ).timeout(const Duration(seconds: 30));
+      final resp = await http
+          .post(
+            Uri.parse(Urls.forgetPassword),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
 
-      debugPrint('AuthController.sendVerificationCode status: ${resp.statusCode}');
+      debugPrint(
+        'AuthController.sendVerificationCode status: ${resp.statusCode}',
+      );
       debugPrint('AuthController.sendVerificationCode resp: ${resp.body}');
 
       EasyLoading.dismiss();
@@ -430,7 +462,9 @@ class AuthController extends GetxController {
         final success = parsed['success'] == true;
 
         if (success) {
-          EasyLoading.showSuccess(parsed['message'] ?? 'Verification code sent to $email');
+          EasyLoading.showSuccess(
+            parsed['message'] ?? 'Verification code sent to $email',
+          );
           // Navigate to verify code screen
           goToVerifyCode();
           return;
@@ -447,7 +481,9 @@ class AuthController extends GetxController {
     } catch (e) {
       EasyLoading.dismiss();
       debugPrint('AuthController.sendVerificationCode error: $e');
-      EasyLoading.showError('Failed to send verification code: ${e.toString()}');
+      EasyLoading.showError(
+        'Failed to send verification code: ${e.toString()}',
+      );
     } finally {
       _isLoading.value = false;
     }
@@ -472,18 +508,20 @@ class AuthController extends GetxController {
       EasyLoading.show(status: 'Please wait...');
 
       final email = emailController.text.trim();
-      final body = jsonEncode({
-        'otp': code,
-      });
+      final body = jsonEncode({'otp': code});
 
-      debugPrint('AuthController.verifyCode URL: ${Urls.forgetPasswordOtp(email)}');
+      debugPrint(
+        'AuthController.verifyCode URL: ${Urls.forgetPasswordOtp(email)}',
+      );
       debugPrint('AuthController.verifyCode body: $body');
 
-      final resp = await http.post(
-        Uri.parse(Urls.forgetPasswordOtp(email)),
-        headers: {'Content-Type': 'application/json'},
-        body: body,
-      ).timeout(const Duration(seconds: 30));
+      final resp = await http
+          .post(
+            Uri.parse(Urls.forgetPasswordOtp(email)),
+            headers: {'Content-Type': 'application/json'},
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
 
       debugPrint('AuthController.verifyCode status: ${resp.statusCode}');
       debugPrint('AuthController.verifyCode resp: ${resp.body}');
@@ -497,9 +535,13 @@ class AuthController extends GetxController {
         if (success) {
           // Store the token for reset password
           _forgotPasswordToken = parsed['access'] ?? parsed['token'];
-          debugPrint('AuthController.verifyCode token stored: $_forgotPasswordToken');
-          
-          EasyLoading.showSuccess(parsed['message'] ?? 'Code verified successfully');
+          debugPrint(
+            'AuthController.verifyCode token stored: $_forgotPasswordToken',
+          );
+
+          EasyLoading.showSuccess(
+            parsed['message'] ?? 'Code verified successfully',
+          );
           // Navigate to reset password screen
           goToResetPassword();
           return true;
@@ -565,22 +607,22 @@ class AuthController extends GetxController {
     try {
       EasyLoading.show(status: 'Please wait...');
 
-      final body = jsonEncode({
-        'new_password': newPassword,
-      });
+      final body = jsonEncode({'new_password': newPassword});
 
       debugPrint('AuthController.resetPassword URL: ${Urls.resetPassword}');
       debugPrint('AuthController.resetPassword body: $body');
       debugPrint('AuthController.resetPassword token: $_forgotPasswordToken');
 
-      final resp = await http.post(
-        Uri.parse(Urls.resetPassword),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $_forgotPasswordToken',
-        },
-        body: body,
-      ).timeout(const Duration(seconds: 30));
+      final resp = await http
+          .post(
+            Uri.parse(Urls.resetPassword),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $_forgotPasswordToken',
+            },
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
 
       debugPrint('AuthController.resetPassword status: ${resp.statusCode}');
       debugPrint('AuthController.resetPassword resp: ${resp.body}');
@@ -592,11 +634,13 @@ class AuthController extends GetxController {
         final success = parsed['success'] == true;
 
         if (success) {
-          EasyLoading.showSuccess(parsed['message'] ?? 'Password reset successfully!');
-          
+          EasyLoading.showSuccess(
+            parsed['message'] ?? 'Password reset successfully!',
+          );
+
           // Clear the token
           _forgotPasswordToken = null;
-          
+
           // Clear forgot password fields
           clearForgotPasswordForm();
 

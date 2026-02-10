@@ -58,6 +58,23 @@ class ProfileController extends GetxController {
         final jsonData = jsonDecode(response.body);
         final profileModel = ProfileModel.fromJson(jsonData);
         profileData.value = profileModel.profileData;
+
+        // Save profile info to SharedPreferences for chat
+        if (profileData.value != null) {
+          // Save user ID if available
+          if (profileData.value!.id != null) {
+            await prefs.setInt('user_id', profileData.value!.id!);
+          }
+          await prefs.setString('full_name', profileData.value!.fullName);
+          if (profileData.value!.image != null) {
+            await prefs.setString('image', profileData.value!.image!);
+          }
+
+          debugPrint(
+            'ProfileController: ✅ Saved User ID: ${profileData.value!.id}',
+          );
+        }
+
         debugPrint('ProfileController: Profile data loaded successfully');
         debugPrint('ProfileController: Image URL: ${profileData.value?.image}');
         debugPrint(

@@ -1,4 +1,6 @@
 import 'package:floor_bot_mobile/app/controllers/support_chat_controller.dart';
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
+import 'package:floor_bot_mobile/app/models/chat_message_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -104,7 +106,7 @@ class SupportChatScreen extends StatelessWidget {
                   itemCount: controller.messages.length,
                   itemBuilder: (context, index) {
                     final message = controller.messages[index];
-                    return _buildMessageBubble(message);
+                    return _buildMessageBubble(message, controller);
                   },
                 ),
               );
@@ -116,37 +118,35 @@ class SupportChatScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageBubble(message) {
-    final isAdmin = message.isAdmin;
-    final time = DateFormat('hh:mm a').format(message.timestamp);
+  Widget _buildMessageBubble(
+    ChatMessage message,
+    SupportChatController controller,
+  ) {
+    // Check if message is from current user (right side) or others (left side)
+    final isMyMessage = controller.isMyMessage(message.sender.id);
+    final time = DateFormat('hh:mm a').format(message.createdAt);
+    final senderName = message.sender.fullName;
+
     return Padding(
       padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
-        mainAxisAlignment: isAdmin
-            ? MainAxisAlignment.start
-            : MainAxisAlignment.end,
+        mainAxisAlignment: isMyMessage
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (isAdmin) ...[
-            CircleAvatar(
-              backgroundColor: Colors.blue[600],
-              radius: 16.r,
-              child: Icon(
-                Icons.support_agent,
-                color: Colors.white,
-                size: 16.sp,
-              ),
-            ),
+          if (!isMyMessage) ...[
+            _buildProfileAvatar(message.sender.image, isMyMessage: false),
             SizedBox(width: 8.w),
           ],
           Flexible(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
-                color: isAdmin ? Colors.white : Colors.blue[600],
+                color: isMyMessage ? Colors.blue[600] : Colors.white,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(isAdmin ? 4.r : 16.r),
-                  topRight: Radius.circular(isAdmin ? 16.r : 4.r),
+                  topLeft: Radius.circular(isMyMessage ? 16.r : 4.r),
+                  topRight: Radius.circular(isMyMessage ? 4.r : 16.r),
                   bottomLeft: Radius.circular(16.r),
                   bottomRight: Radius.circular(16.r),
                 ),
@@ -161,9 +161,9 @@ class SupportChatScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (isAdmin && message.senderName != null) ...[
+                  if (!isMyMessage && senderName.isNotEmpty) ...[
                     Text(
-                      message.senderName!,
+                      senderName,
                       style: TextStyle(
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
@@ -173,10 +173,10 @@ class SupportChatScreen extends StatelessWidget {
                     SizedBox(height: 4.h),
                   ],
                   Text(
-                    message.message,
+                    message.text,
                     style: TextStyle(
                       fontSize: 14.sp,
-                      color: isAdmin ? Colors.black87 : Colors.white,
+                      color: isMyMessage ? Colors.white : Colors.black87,
                       height: 1.4,
                     ),
                   ),
@@ -185,20 +185,16 @@ class SupportChatScreen extends StatelessWidget {
                     time,
                     style: TextStyle(
                       fontSize: 11.sp,
-                      color: isAdmin ? Colors.grey[500] : Colors.white70,
+                      color: isMyMessage ? Colors.white70 : Colors.grey[500],
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          if (!isAdmin) ...[
+          if (isMyMessage) ...[
             SizedBox(width: 8.w),
-            CircleAvatar(
-              backgroundColor: Colors.grey[300],
-              radius: 16.r,
-              child: Icon(Icons.person, color: Colors.grey[600], size: 16.sp),
-            ),
+            _buildProfileAvatar(message.sender.image, isMyMessage: true),
           ],
         ],
       ),
@@ -279,6 +275,26 @@ class SupportChatScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildProfileAvatar(String? imageUrl, {required bool isMyMessage}) {
+    final hasImage = imageUrl != null && imageUrl.isNotEmpty;
+    final fullImageUrl = hasImage && !imageUrl.startsWith('http')
+        ? '${Urls.serverBase}$imageUrl'
+        : imageUrl;
+
+    return CircleAvatar(
+      backgroundColor: isMyMessage ? Colors.grey[300] : Colors.blue[600],
+      radius: 16.r,
+      backgroundImage: hasImage ? NetworkImage(fullImageUrl!) : null,
+      child: hasImage
+          ? null
+          : Icon(
+              isMyMessage ? Icons.person : Icons.support_agent,
+              color: isMyMessage ? Colors.grey[600] : Colors.white,
+              size: 16.sp,
+            ),
     );
   }
 }
