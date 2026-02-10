@@ -1,8 +1,12 @@
+import 'dart:io';
 import 'package:floor_bot_mobile/app/core/services/ai_service.dart';
 import 'package:floor_bot_mobile/app/models/ai_prompt.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:record/record.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:path_provider/path_provider.dart';
 
 class ChatMessage {
   final String text;
@@ -24,8 +28,12 @@ class AiAssistantController extends GetxController {
   final RxBool hasText = false.obs;
   final RxBool isChatMode = false.obs;
   final RxnString sessionId = RxnString();
+  final RxBool isListening = false.obs;
+  final RxBool isRecording = false.obs;
 
   final AiService _aiService = AiService();
+  final AudioRecorder _audioRecorder = AudioRecorder();
+  String? _recordingPath;
 
   @override
   void onInit() {
@@ -42,6 +50,7 @@ class AiAssistantController extends GetxController {
   @override
   void onClose() {
     _endSession();
+    _audioRecorder.dispose();
     textController.dispose();
     super.onClose();
   }
@@ -182,14 +191,126 @@ class AiAssistantController extends GetxController {
     EasyLoading.dismiss();
   }
 
-  void handleVoiceInput() {
-    debugPrint('🎤 Voice input requested');
-    Get.snackbar(
-      'Voice Input',
-      'Voice input feature coming soon!',
-      snackPosition: SnackPosition.BOTTOM,
-      duration: const Duration(seconds: 2),
-    );
+  Future<void> handleVoiceInput() async {
+    if (isRecording.value) {
+      // Stop recording and transcribe
+      await _stopRecording();
+      return;
+    }
+
+    // Check microphone permission
+    final permission = await Permission.microphone.status;
+    if (!permission.isGranted) {
+      final result = await Permission.microphone.request();
+      if (!result.isGranted) {
+        Get.snackbar(
+          'Permission Required',
+          'Microphone permission is required for voice input',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+    }
+
+    // Check if recorder has permission
+    if (!await _audioRecorder.hasPermission()) {
+      Get.snackbar(
+        'Permission Required',
+        'Microphone permission is required',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
+    // Start recording
+    await _startRecording();
+  }
+
+  Future<void> _startRecording() async {
+    try {
+      debugPrint('🎤 Starting audio recording...');
+
+      // Get temporary directory
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      _recordingPath = '${directory.path}/audio_$timestamp.wav';
+
+      // Start recording in WAV format
+      await _audioRecorder.start(
+        const RecordConfig(
+          encoder: AudioEncoder.wav,
+          numChannels: 1,
+          sampleRate: 16000,
+        ),
+        path: _recordingPath!,
+      );
+
+      isRecording.value = true;
+      isListening.value = true;
+      debugPrint('✅ Recording started: $_recordingPath');
+    } catch (e) {
+      debugPrint('❌ Error starting recording: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to start recording',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
+  Future<void> _stopRecording() async {
+    try {
+      debugPrint('🛑 Stopping audio recording...');
+
+      final path = await _audioRecorder.stop();
+      isRecording.value = false;
+      isListening.value = false;
+
+      if (path != null && File(path).existsSync()) {
+        debugPrint('✅ Recording saved: $path');
+
+        // Show transcribing indicator
+        EasyLoading.show(status: 'Transcribing...');
+
+        // Transcribe audio
+        final transcription = await _aiService.transcribeAudio(path);
+
+        EasyLoading.dismiss();
+
+        if (transcription != null && transcription.isNotEmpty) {
+          // Set the transcribed text in the text field
+          textController.text = transcription;
+          debugPrint('✅ Transcription: $transcription');
+
+          // Delete the audio file after transcription
+          try {
+            await File(path).delete();
+            debugPrint('🗑️ Audio file deleted');
+          } catch (e) {
+            debugPrint('⚠️ Failed to delete audio file: $e');
+          }
+        } else {
+          debugPrint('❌ Transcription failed');
+          Get.snackbar(
+            'Error',
+            'Failed to transcribe audio. Please try again.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      } else {
+        debugPrint('❌ Recording file not found');
+      }
+    } catch (e) {
+      debugPrint('❌ Error stopping recording: $e');
+      isRecording.value = false;
+      isListening.value = false;
+      EasyLoading.dismiss();
+      Get.snackbar(
+        'Error',
+        'Failed to process recording',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
   }
 
   void closeSheet() async {

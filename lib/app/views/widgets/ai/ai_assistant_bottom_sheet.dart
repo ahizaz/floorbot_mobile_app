@@ -125,7 +125,9 @@ class AiAssistantBottomSheet extends StatelessWidget {
                   Obx(
                     () => Container(
                       decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
+                        color: controller.isListening.value 
+                            ? Colors.red 
+                            : AppColors.primaryColor,
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -133,7 +135,9 @@ class AiAssistantBottomSheet extends StatelessWidget {
                             ? controller.handleSend()
                             : controller.handleVoiceInput(),
                         icon: Icon(
-                          controller.hasText.value ? Icons.send : Icons.mic,
+                          controller.isListening.value
+                              ? Icons.stop
+                              : (controller.hasText.value ? Icons.send : Icons.mic),
                           color: Colors.white,
                           size: 22.sp,
                         ),

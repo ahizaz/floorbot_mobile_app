@@ -4,6 +4,10 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.CAMERA" />
     
+    <!-- Microphone permission for voice input -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    
     <application
         android:label="floor_bot_mobile"
         android:name="${applicationName}"

@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AiService {
@@ -99,6 +101,48 @@ class AiService {
       }
     } catch (e) {
       debugPrint('💥 Error sending message: $e');
+      return null;
+    }
+  }
+
+  Future<String?> transcribeAudio(String audioPath) async {
+    try {
+      debugPrint('🎤 Transcribing audio file: $audioPath');
+
+      final token = await _getToken();
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${Urls.baseUrl}/ai-fetures/transcribe/'),
+      );
+
+      request.headers['Authorization'] = 'Bearer $token';
+
+      // Add the audio file
+      final audioFile = await http.MultipartFile.fromPath(
+        'audio',
+        audioPath,
+        contentType: MediaType('audio', 'wav'),
+      );
+      request.files.add(audioFile);
+
+      debugPrint('📤 Sending audio file for transcription...');
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint('📡 Transcription Response: ${response.statusCode}');
+      debugPrint('📄 Response Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final transcription = data['text'] ?? data['transcription'];
+        debugPrint('✅ Transcription received: $transcription');
+        return transcription;
+      } else {
+        debugPrint('❌ Failed to transcribe audio: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('💥 Error transcribing audio: $e');
       return null;
     }
   }

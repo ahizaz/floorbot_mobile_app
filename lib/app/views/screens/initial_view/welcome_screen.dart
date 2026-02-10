@@ -36,6 +36,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final keyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return Scaffold(
       backgroundColor: theme.colorScheme.primary,
@@ -44,7 +45,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           children: [
             // Top section with dark background
             Expanded(
-              flex: 6,
+              flex: keyboardVisible ? 3 : 6,
               child: Container(
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -52,13 +53,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Logo
-                    SvgPicture.asset('assets/svgs/app_logo.svg', height: 50.h),
-                    SizedBox(height: 40.h),
+                    if (!keyboardVisible)
+                      SvgPicture.asset(
+                        'assets/svgs/app_logo.svg',
+                        height: 50.h,
+                      ),
+                    if (!keyboardVisible) SizedBox(height: 40.h),
 
                     // Illustration
                     SvgPicture.asset(
                       'assets/svgs/welcome_animate.svg',
-                      height: 280.h,
+                      height: keyboardVisible ? 120.h : 280.h,
                       fit: BoxFit.contain,
                     ),
                   ],
@@ -68,7 +73,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
 
             // Bottom section with white background
             Expanded(
-              flex: 5,
+              flex: keyboardVisible ? 7 : 5,
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
@@ -79,9 +84,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   // ),
                 ),
                 child: SingleChildScrollView(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: 24.w,
-                    vertical: 32.h,
+                  padding: EdgeInsets.only(
+                    left: 24.w,
+                    right: 24.w,
+                    top: keyboardVisible ? 16.h : 32.h,
+                    bottom: 16.h,
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -106,7 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         textAlign: TextAlign.center,
                       ),
 
-                      SizedBox(height: 32.h),
+                      SizedBox(height: keyboardVisible ? 16.h : 32.h),
 
                       // Continue with Google Button
                       CustomOutlinedButton(
