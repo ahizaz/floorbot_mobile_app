@@ -5,6 +5,7 @@ import 'package:floor_bot_mobile/app/views/screens/orders/order_details_screen.d
 import 'package:floor_bot_mobile/app/views/screens/settings/account_settings_bottom_sheet.dart';
 import 'package:floor_bot_mobile/app/views/screens/settings/reset_password_bottom_sheet.dart';
 import 'package:floor_bot_mobile/app/views/screens/initial_view/welcome_screen.dart';
+import 'package:floor_bot_mobile/app/views/screens/support/support_chat_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/settings/settings_bottom_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -189,12 +190,8 @@ class SettingsTab extends StatelessWidget {
               _showResetPassword();
             },
             onSupport: () {
-              // Handle support
-              Get.snackbar(
-                'Support',
-                'Live chat coming soon',
-                snackPosition: SnackPosition.BOTTOM,
-              );
+             Get.to(() => const SupportChatScreen());
+
             },
             onTerms: () {
               // Handle terms
