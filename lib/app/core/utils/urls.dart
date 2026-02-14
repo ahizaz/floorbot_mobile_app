@@ -12,6 +12,7 @@ class Urls {
   static const String catagoriesScreen = "$baseUrl/users/categories/";
   static const String catagories = "$baseUrl/users/categories/";
   static const String newProduct = "$baseUrl/users/products/?search=newest";
+  static  String newProductWithPage(int page)=>"$baseUrl/users/products/?search=newest&page=$page";
   static const String bestDeals = "$baseUrl/users/products/?search=best";
   //static const String search ="$baseUrl/users/products/?search=soft carpet";
   static String searchProducts(String query) =>
@@ -26,4 +27,5 @@ class Urls {
       "$baseUrl/chats/unseen-notifications-count/";
   static const String supportmessage = "$baseUrl/chats/supports";
   static const String sessionCreate = "$baseUrl/ai-fetures/session/create/";
+  static const String chattingwithAi ="$baseUrl/ai-fetures/chat/text/";
 }

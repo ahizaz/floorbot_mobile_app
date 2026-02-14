@@ -22,6 +22,20 @@ class ExploreController extends GetxController {
   final RxList<Product> newArrivals = <Product>[].obs;
   final RxList<Product> bestDeals = <Product>[].obs;
   final RxBool isLoadingCategories = false.obs;
+//New Arrivals pagination
+  final RxBool isLoadingMoreNewArrivals =false.obs;
+  final RxInt currentNewArrivalsPage = 1.obs;
+  final RxInt totalNewArrivalsPages=1.obs;
+  final RxBool hasMoreNewArrivals = true.obs;
+  final RxString nextNewArrivalsUrl=''.obs;
+
+  //Best Deals pagination
+  final RxBool isLoadingMoreBestDeals = false.obs;
+  final RxInt currentBestDealsPage = 1.obs;
+  final RxInt totalBestDealsPages = 1.obs;
+  final RxBool hasMoreBestDeals =true.obs;
+  final RxString nextBestDealsUrl=''.obs;
+
 
   @override
   void onInit() {
@@ -154,6 +168,16 @@ class ExploreController extends GetxController {
 
         if (jsonData['success'] == true && jsonData['data'] != null) {
           final List<dynamic> productsJson = jsonData['data'];
+          if(jsonData['meta']!=null){
+            final meta = jsonData['meta'];
+            currentNewArrivalsPage.value = meta['current_page']??1;
+            totalNewArrivalsPages.value = meta['total_pages']??1;
+            nextNewArrivalsUrl.value = meta['next']??'';
+            hasMoreNewArrivals.value= nextNewArrivalsUrl.value.isNotEmpty;
+
+
+          }
+
           debugPrint(
             'ExploreController: Products count: ${productsJson.length}',
           );
@@ -460,4 +484,112 @@ class ExploreController extends GetxController {
   String formatProductPrice(Product product) {
     return '${Get.find<CurrencyController>().formatPrice(product.price)}/box';
   }
+  // Load more new arrivals for pagination
+Future<void> loadMoreNewArrivals() async {
+  if (isLoadingMoreNewArrivals.value || !hasMoreNewArrivals.value) return;
+
+  try {
+    isLoadingMoreNewArrivals.value = true;
+    
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access') ?? '';
+    
+    // Use next URL from response or construct URL with next page
+    String url = nextNewArrivalsUrl.value.isNotEmpty 
+        ? nextNewArrivalsUrl.value 
+        : Urls.newProductWithPage(currentNewArrivalsPage.value + 1);
+    
+    debugPrint('ExploreController: Loading more new arrivals from $url');
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 30));
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonData = jsonDecode(response.body);
+      
+      if (jsonData['success'] == true && jsonData['data'] != null) {
+        final List<dynamic> productsJson = jsonData['data'];
+        
+        // Update meta info
+        if (jsonData['meta'] != null) {
+          final meta = jsonData['meta'];
+          currentNewArrivalsPage.value = meta['current_page'] ?? currentNewArrivalsPage.value;
+          totalNewArrivalsPages.value = meta['total_pages'] ?? totalNewArrivalsPages.value;
+          nextNewArrivalsUrl.value = meta['next'] ?? '';
+          hasMoreNewArrivals.value = nextNewArrivalsUrl.value.isNotEmpty;
+        }
+        
+        // Add new products to existing list
+        final newProducts = productsJson
+            .map((json) => Product.fromJson(json))
+            .toList();
+        newArrivals.addAll(newProducts);
+        
+        debugPrint('ExploreController: Loaded ${newProducts.length} more products. Total: ${newArrivals.length}');
+      }
+    }
+  } catch (e) {
+    debugPrint('ExploreController: Error loading more new arrivals: $e');
+  } finally {
+    isLoadingMoreNewArrivals.value = false;
+  }
+}
+
+// Same for best deals
+Future<void> loadMoreBestDeals() async {
+  if (isLoadingMoreBestDeals.value || !hasMoreBestDeals.value) return;
+
+  try {
+    isLoadingMoreBestDeals.value = true;
+    
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('access') ?? '';
+    
+    String url = nextBestDealsUrl.value.isNotEmpty 
+        ? nextBestDealsUrl.value 
+        : '${Urls.bestDeals}&page=${currentBestDealsPage.value + 1}';
+    
+    debugPrint('ExploreController: Loading more best deals from $url');
+    
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    ).timeout(const Duration(seconds: 30));
+    
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      final jsonData = jsonDecode(response.body);
+      
+      if (jsonData['success'] == true && jsonData['data'] != null) {
+        final List<dynamic> productsJson = jsonData['data'];
+        
+        if (jsonData['meta'] != null) {
+          final meta = jsonData['meta'];
+          currentBestDealsPage.value = meta['current_page'] ?? currentBestDealsPage.value;
+          totalBestDealsPages.value = meta['total_pages'] ?? totalBestDealsPages.value;
+          nextBestDealsUrl.value = meta['next'] ?? '';
+          hasMoreBestDeals.value = nextBestDealsUrl.value.isNotEmpty;
+        }
+        
+        final newProducts = productsJson
+            .map((json) => Product.fromJson(json))
+            .toList();
+        bestDeals.addAll(newProducts);
+        
+        debugPrint('ExploreController: Loaded ${newProducts.length} more best deals. Total: ${bestDeals.length}');
+      }
+    }
+  } catch (e) {
+    debugPrint('ExploreController: Error loading more best deals: $e');
+  } finally {
+    isLoadingMoreBestDeals.value = false;
+  }
+}
 }

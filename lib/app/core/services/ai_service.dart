@@ -79,12 +79,18 @@ class AiService {
   Future<String?> sendMessage(String sessionId, String message) async {
     try {
       debugPrint('💬 Sending message to AI...');
+      debugPrint('📤 Message: $message');
+      debugPrint('🆔 Session ID: $sessionId');
 
       final headers = await _getHeaders();
+      final body = json.encode({'message': message, 'session_id': sessionId});
+
+      debugPrint('📦 Request Body: $body');
+
       final response = await http.post(
-        Uri.parse('${Urls.baseUrl}/ai-fetures/session/$sessionId/message/'),
+        Uri.parse(Urls.chattingwithAi),
         headers: headers,
-        body: json.encode({'message': message}),
+        body: body,
       );
 
       debugPrint('📡 Message Response: ${response.statusCode}');
@@ -92,9 +98,26 @@ class AiService {
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        final aiResponse = data['response'] ?? data['message'];
-        debugPrint('✅ AI response received');
-        return aiResponse;
+
+        final success = data['success'] ?? false;
+        final error = data['error'];
+        final aiResponse = data['response'];
+        final transcribedText = data['transcribed_text'];
+        final returnedSessionId = data['session_id'];
+
+        debugPrint('✅ Success: $success');
+        debugPrint('🆔 Returned Session ID: $returnedSessionId');
+        debugPrint('💬 AI Response: $aiResponse');
+        debugPrint('🎤 Transcribed Text: $transcribedText');
+        debugPrint('❌ Error: $error');
+
+        if (success && aiResponse != null) {
+          debugPrint('✅ AI response received successfully');
+          return aiResponse;
+        } else {
+          debugPrint('❌ Failed - Error: $error');
+          return null;
+        }
       } else {
         debugPrint('❌ Failed to get AI response: ${response.body}');
         return null;

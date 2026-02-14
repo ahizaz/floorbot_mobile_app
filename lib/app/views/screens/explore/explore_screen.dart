@@ -1,6 +1,7 @@
 import 'package:floor_bot_mobile/app/controllers/explore_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/nav_controller.dart';
 import 'package:floor_bot_mobile/app/controllers/profile_controller.dart';
+import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
 import 'package:floor_bot_mobile/app/views/screens/calculator_test_screen.dart';
 import 'package:floor_bot_mobile/app/views/screens/notifications/notification_screen.dart';
 import 'package:floor_bot_mobile/app/views/widgets/explore/explore_header.dart';
@@ -103,30 +104,77 @@ class ExploreTab extends StatelessWidget {
                       onShowAllTap: () => controller.onShowAllNewArrivals(),
                     ),
 
-                    SizedBox(
-                      height: 220.h,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        itemCount: controller.newArrivals.length,
-                        separatorBuilder: (context, index) =>
-                            SizedBox(width: 16.w),
-                        itemBuilder: (context, index) {
-                          final product = controller.newArrivals[index];
-                          return ProductCard(
-                            imageAsset: product.imageAsset,
-                            imageUrl: product.imageUrl,
-                            title: product.name,
-                            subtitle: product.description,
-                            price: controller.formatProductPrice(product),
-                            width: product.width,
-                            length: product.length,
-                            onTap: () => controller.onProductTap(product.id),
-                            onAddTap: () => controller.onAddToCart(product),
-                          );
-                        },
-                      ),
-                    ),
+                    // SizedBox(
+                    //   height: 220.h,
+                    //   child: ListView.separated(
+                    //     scrollDirection: Axis.horizontal,
+                    //     padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    //     itemCount: controller.newArrivals.length,
+                    //     separatorBuilder: (context, index) =>
+                    //         SizedBox(width: 16.w),
+                    //     itemBuilder: (context, index) {
+                    //       final product = controller.newArrivals[index];
+                    //       return ProductCard(
+                    //         imageAsset: product.imageAsset,
+                    //         imageUrl: product.imageUrl,
+                    //         title: product.name,
+                    //         subtitle: product.description,
+                    //         price: controller.formatProductPrice(product),
+                    //         width: product.width,
+                    //         length: product.length,
+                    //         onTap: () => controller.onProductTap(product.id),
+                    //         onAddTap: () => controller.onAddToCart(product),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                    // New arrival section এর ListView এ NotificationListener যোগ করুন:
+SizedBox(
+  height: 220.h,
+  child: NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification scrollInfo) {
+      // যখন user শেষের কাছে scroll করবে, তখন আরো products load করবে
+      if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+          !controller.isLoadingMoreNewArrivals.value &&
+          controller.hasMoreNewArrivals.value) {
+        controller.loadMoreNewArrivals();
+      }
+      return false;
+    },
+    child: Obx(() => ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      itemCount: controller.newArrivals.length + 
+                 (controller.hasMoreNewArrivals.value ? 1 : 0),
+      separatorBuilder: (context, index) => SizedBox(width: 16.w),
+      itemBuilder: (context, index) {
+        // Loading indicator শেষে দেখানোর জন্য
+        if (index == controller.newArrivals.length) {
+          return Container(
+            width: 180.w,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(
+              color: AppColors.primaryColor,
+            ),
+          );
+        }
+        
+        final product = controller.newArrivals[index];
+        return ProductCard(
+          imageAsset: product.imageAsset,
+          imageUrl: product.imageUrl,
+          title: product.name,
+          subtitle: product.description,
+          price: controller.formatProductPrice(product),
+          width: product.width,
+          length: product.length,
+          onTap: () => controller.onProductTap(product.id),
+          onAddTap: () => controller.onAddToCart(product),
+        );
+      },
+    )),
+  ),
+),
 
                     SizedBox(height: 16.h),
 
@@ -136,34 +184,80 @@ class ExploreTab extends StatelessWidget {
                       onShowAllTap: () => controller.onShowAllBestDeals(),
                     ),
 
-                    SizedBox(
-                      height: 220.h,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        itemCount: controller.bestDeals.length,
-                        separatorBuilder: (context, index) =>
-                            SizedBox(width: 16.w),
-                        itemBuilder: (context, index) {
-                          final product = controller.bestDeals[index];
-                          return ProductCard(
-                            imageAsset: product.imageAsset,
-                            imageUrl: product.imageUrl,
-                            title: product.name,
-                            subtitle: product.description,
-                            price: controller.formatProductPrice(product),
-                            width: product.width,
-                            length: product.length,
-                            onTap: () => controller.onProductTap(
-                              product.id,
-                              isBestDeal: true,
-                            ),
-                            onAddTap: () => controller.onAddToCart(product),
-                          );
-                        },
-                      ),
-                    ),
-
+                    // SizedBox(
+                    //   height: 220.h,
+                    //   child: ListView.separated(
+                    //     scrollDirection: Axis.horizontal,
+                    //     padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    //     itemCount: controller.bestDeals.length,
+                    //     separatorBuilder: (context, index) =>
+                    //         SizedBox(width: 16.w),
+                    //     itemBuilder: (context, index) {
+                    //       final product = controller.bestDeals[index];
+                    //       return ProductCard(
+                    //         imageAsset: product.imageAsset,
+                    //         imageUrl: product.imageUrl,
+                    //         title: product.name,
+                    //         subtitle: product.description,
+                    //         price: controller.formatProductPrice(product),
+                    //         width: product.width,
+                    //         length: product.length,
+                    //         onTap: () => controller.onProductTap(
+                    //           product.id,
+                    //           isBestDeal: true,
+                    //         ),
+                    //         onAddTap: () => controller.onAddToCart(product),
+                    //       );
+                    //     },
+                    //   ),
+                    // ),
+                   SizedBox(
+  height: 220.h,
+  child: NotificationListener<ScrollNotification>(
+    onNotification: (ScrollNotification scrollInfo) {
+      if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200 &&
+          !controller.isLoadingMoreBestDeals.value &&
+          controller.hasMoreBestDeals.value) {
+        controller.loadMoreBestDeals();
+      }
+      return false;
+    },
+    child: Obx(() => ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      itemCount: controller.bestDeals.length + 
+                 (controller.hasMoreBestDeals.value ? 1 : 0),
+      separatorBuilder: (context, index) => SizedBox(width: 16.w),
+      itemBuilder: (context, index) {
+        if (index == controller.bestDeals.length) {
+          return Container(
+            width: 180.w,
+            alignment: Alignment.center,
+            child: CircularProgressIndicator(
+              color: AppColors.primaryColor,
+            ),
+          );
+        }
+        
+        final product = controller.bestDeals[index];
+        return ProductCard(
+          imageAsset: product.imageAsset,
+          imageUrl: product.imageUrl,
+          title: product.name,
+          subtitle: product.description,
+          price: controller.formatProductPrice(product),
+          width: product.width,
+          length: product.length,
+          onTap: () => controller.onProductTap(
+            product.id,
+            isBestDeal: true,
+          ),
+          onAddTap: () => controller.onAddToCart(product),
+        );
+      },
+    )),
+  ),
+),
                     SizedBox(
                       height: 100.h,
                     ), // Extra padding for floating bottom nav
