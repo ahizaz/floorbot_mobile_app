@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -116,22 +118,38 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       SizedBox(height: keyboardVisible ? 16.h : 32.h),
 
                       // Continue with Google Button
+                      // CustomOutlinedButton(
+                      //   text: 'Continue with Google',
+                      //   onPressed: () {
+                      //     final authController = Get.put(AuthController());
+                      //     authController.signInWithGoogle();
+                      //   },
+                      //   leadingIcon: SvgPicture.asset(
+                      //     'assets/svgs/google_icon.svg',
+                      //     width: 24.w,
+                      //     height: 24.h,
+                      //   ),
+                      //   borderColor: Colors.grey[300],
+                      //   textColor: theme.colorScheme.onSurface,
+                      // ),
+                   if (Platform.isAndroid) ...[
                       CustomOutlinedButton(
-                        text: 'Continue with Google',
-                        onPressed: () {
-                          final authController = Get.put(AuthController());
-                          authController.signInWithGoogle();
-                        },
-                        leadingIcon: SvgPicture.asset(
-                          'assets/svgs/google_icon.svg',
-                          width: 24.w,
-                          height: 24.h,
-                        ),
-                        borderColor: Colors.grey[300],
-                        textColor: theme.colorScheme.onSurface,
-                      ),
-
-                      SizedBox(height: 20.h),
+               text: 'Continue with Google',
+                   onPressed: () {
+                  final authController = Get.put(AuthController());
+                 authController.signInWithGoogle();
+                  },
+    leadingIcon: SvgPicture.asset(
+      'assets/svgs/google_icon.svg',
+      width: 24.w,
+      height: 24.h,
+    ),
+    borderColor: Colors.grey[300],
+    textColor: theme.colorScheme.onSurface,
+  ),
+  SizedBox(height: 20.h),
+               ],
+                     
 
                       // Or Divider
                       const OrDivider(),
