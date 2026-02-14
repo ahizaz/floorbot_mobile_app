@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "91978557269",
+    "project_id": "floorbot-15097",
+    "storage_bucket": "floorbot-15097.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91978557269:android:d074f1e7ce1cf5b405b1dc",
+        "android_client_info": {
+          "package_name": "com.example.floor_bot_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ4pH6209xNi9ywNtzNg4GsplWW6Ye6B0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
