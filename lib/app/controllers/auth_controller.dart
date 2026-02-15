@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/views/screens/bottom_nav/app_nav_view.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -340,36 +342,205 @@ class AuthController extends GetxController {
   }
 
   // Sign in with Google
-  Future<void> signInWithGoogle() async {
-    _isLoading.value = true;
+  // Future<void> signInWithGoogle() async {
+  //   _isLoading.value = true;
 
-    try {
-      // TODO: Implement Google sign in
-      await Future.delayed(const Duration(seconds: 2));
+  //   try {
+  //     // TODO: Implement Google sign in
+  //     await Future.delayed(const Duration(seconds: 2));
 
-      Get.snackbar(
-        'Success',
-        'Signed in with Google successfully!',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Get.theme.colorScheme.primary,
-        colorText: Colors.white,
-      );
+  //     Get.snackbar(
+  //       'Success',
+  //       'Signed in with Google successfully!',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Get.theme.colorScheme.primary,
+  //       colorText: Colors.white,
+  //     );
 
-      // Navigate to dashboard with bottom navigation
-      Get.offAll(() => const AppNavView());
-      clearForm();
-    } catch (e) {
+  //     // Navigate to dashboard with bottom navigation
+  //     Get.offAll(() => const AppNavView());
+  //     clearForm();
+  //   } catch (e) {
+  //     Get.snackbar(
+  //       'Error',
+  //       'Failed to sign in with Google: ${e.toString()}',
+  //       snackPosition: SnackPosition.BOTTOM,
+  //       backgroundColor: Colors.red,
+  //       colorText: Colors.white,
+  //     );
+  //   } finally {
+  //     _isLoading.value = false;
+  //   }
+  // }
+// Sign in with Google
+Future<void> signInWithGoogle() async {
+  _isLoading.value = true;
+
+  try {
+    EasyLoading.show(status: 'Signing in with Google...');
+    
+    // Initialize Firebase Auth and Google Sign In with Web Client ID
+    final GoogleSignIn googleSignIn = GoogleSignIn(
+      scopes: ['email'],
+      // Web Client ID from google-services.json (client_type: 3)
+      serverClientId: '91978557269-2fg46co7qpu214om8gmputjpffst1b4r.apps.googleusercontent.com',
+    );
+    final FirebaseAuth auth = FirebaseAuth.instance;
+
+    // Sign out first to ensure account picker shows
+    await googleSignIn.signOut();
+    await auth.signOut();
+
+    // Trigger Google Sign In
+    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+    
+    if (googleUser == null) {
+      // User cancelled the sign in
+      EasyLoading.dismiss();
+      _isLoading.value = false;
+      return;
+    }
+
+    debugPrint('Google user signed in: ${googleUser.email}');
+
+    // Get Google Sign In authentication
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    
+    debugPrint('Access Token: ${googleAuth.accessToken != null ? "✓" : "✗"}');
+    debugPrint('ID Token: ${googleAuth.idToken != null ? "✓" : "✗"}');
+
+    // Get the Google ID token (original from Google, not Firebase)
+    final String? googleIdToken = googleAuth.idToken;
+    
+    if (googleIdToken == null) {
+      throw Exception('Failed to get Google ID token');
+    }
+
+    debugPrint('Google ID Token obtained successfully');
+
+    // Create credential for Firebase (still do this for Firebase Auth state)
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth.accessToken,
+      idToken: googleAuth.idToken,
+    );
+
+    // Sign in to Firebase
+    final UserCredential userCredential = await auth.signInWithCredential(credential);
+    
+    debugPrint('Firebase user: ${userCredential.user?.email}');
+
+    // Send Google's original ID token to backend (not Firebase token)
+    final body = jsonEncode({'id_token': googleIdToken});
+    
+    debugPrint('AuthController.signInWithGoogle URL: ${Urls.googleSignIN}');
+
+    final resp = await http
+        .post(
+          Uri.parse(Urls.googleSignIN),
+          headers: {'Content-Type': 'application/json'},
+          body: body,
+        )
+        .timeout(const Duration(seconds: 30));
+
+    debugPrint('Backend response status: ${resp.statusCode}');
+    if (resp.statusCode != 200 && resp.statusCode != 201) {
+      debugPrint('Backend response body: ${resp.body}');
+    }
+
+    EasyLoading.dismiss();
+
+    if (resp.statusCode == 200 || resp.statusCode == 201) {
+      final parsed = jsonDecode(resp.body);
+      final success = parsed['success'] == true;
+      
+      if (success) {
+        // Save access token
+        final token = parsed['access'] ?? parsed['token'] ?? '';
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('access', token);
+
+        // Save user data from response
+        if (parsed['user'] != null) {
+          final user = parsed['user'];
+          final userId = user['id'];
+          final fullName = user['full_name'] ?? '';
+          final email = user['email'] ?? '';
+          final image = user['image'];
+
+          // Save user ID
+          if (userId is int) {
+            await prefs.setInt('user_id', userId);
+          } else if (userId is String) {
+            await prefs.setInt('user_id', int.parse(userId));
+          }
+
+          // Save user profile info
+          if (fullName.isNotEmpty) {
+            await prefs.setString('full_name', fullName);
+          }
+          if (email.isNotEmpty) {
+            await prefs.setString('email', email);
+          }
+          if (image != null && image.toString().isNotEmpty) {
+            await prefs.setString('image', image.toString());
+          }
+
+          debugPrint('AuthController: ✅ Saved User ID: $userId');
+          debugPrint('AuthController: ✅ Saved User Name: $fullName');
+          debugPrint('AuthController: ✅ Saved User Email: $email');
+          debugPrint('AuthController: ✅ Saved User Image: $image');
+        }
+
+        Get.snackbar(
+          'Success',
+          'Signed in with Google successfully!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Get.theme.colorScheme.primary,
+          colorText: Colors.white,
+        );
+
+        // Navigate to dashboard with bottom navigation
+        Get.offAll(() => const AppNavView());
+        clearForm();
+      } else {
+        String message = parsed['message'] ?? parsed['error'] ?? 'Google sign in failed';
+        Get.snackbar(
+          'Error',
+          message,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } else {
+      String message = resp.body;
+      try {
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message'] ?? parsed['error'] ?? resp.body;
+      } catch (_) {}
+
       Get.snackbar(
         'Error',
-        'Failed to sign in with Google: ${e.toString()}',
+        message,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-    } finally {
-      _isLoading.value = false;
     }
+  } catch (e) {
+    EasyLoading.dismiss();
+    debugPrint('AuthController.signInWithGoogle error: $e');
+    Get.snackbar(
+      'Error',
+      'Failed to sign in with Google: ${e.toString()}',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
+  } finally {
+    _isLoading.value = false;
   }
+}
 
   // Validators
   String? validateFullName(String? value) {

@@ -12,7 +12,12 @@
           "package_name": "com.example.floor_bot_mobile"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "91978557269-2fg46co7qpu214om8gmputjpffst1b4r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAQ4pH6209xNi9ywNtzNg4GsplWW6Ye6B0"
@@ -20,7 +25,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91978557269-2fg46co7qpu214om8gmputjpffst1b4r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "91978557269-mpt1gr19q1u1dqilim7srn8morevil2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.floorBotMobile"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:91978557269:android:c56921ec61bc488505b1dc",
+        "android_client_info": {
+          "package_name": "com.florbot.floor_bot_mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91978557269-2fg46co7qpu214om8gmputjpffst1b4r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ4pH6209xNi9ywNtzNg4GsplWW6Ye6B0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91978557269-2fg46co7qpu214om8gmputjpffst1b4r.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "91978557269-mpt1gr19q1u1dqilim7srn8morevil2j.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.floorBotMobile"
+              }
+            }
+          ]
         }
       }
     }
