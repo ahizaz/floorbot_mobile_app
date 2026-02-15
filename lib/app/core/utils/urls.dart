@@ -29,4 +29,5 @@ class Urls {
   static const String sessionCreate = "$baseUrl/ai-fetures/session/create/";
   static const String chattingwithAi ="$baseUrl/ai-fetures/chat/text/";
   static const String googleSignIN ="$baseUrl/auth/google/";
+  static const String voiceAi = "$baseUrl/ai-fetures/chat/voice/";
 }

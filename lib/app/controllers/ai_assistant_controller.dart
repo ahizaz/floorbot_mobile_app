@@ -270,19 +270,61 @@ class AiAssistantController extends GetxController {
         debugPrint('✅ Recording saved: $path');
 
         // Show transcribing indicator
-        EasyLoading.show(status: 'Transcribing...');
+        EasyLoading.show(status: 'AI is thinking...');
 
-        // Transcribe audio
-        final transcription = await _aiService.transcribeAudio(path);
+        // Send audio to voice chat endpoint and get full response
+        final session = sessionId.value;
+        if (session == null) {
+          debugPrint('❌ No AI session available for voice message');
+          EasyLoading.dismiss();
+          return;
+        }
+
+        final result = await _aiService.sendVoiceMessage(
+          sessionId: session,
+          audioPath: path,
+          audioFormat: 'wav',
+          language: 'en',
+        );
 
         EasyLoading.dismiss();
 
-        if (transcription != null && transcription.isNotEmpty) {
-          // Set the transcribed text in the text field
-          textController.text = transcription;
-          debugPrint('✅ Transcription: $transcription');
+        if (result != null) {
+          debugPrint('✅ Voice API returned: $result');
 
-          // Delete the audio file after transcription
+          final success = result['success'] ?? false;
+          final aiResp = result['response'];
+          final transcribed = result['transcribed_text'] ?? result['transcribedText'] ?? '';
+          final returnedSession = result['session_id'] ?? result['sessionId'];
+
+          if (returnedSession != null) {
+            sessionId.value = returnedSession.toString();
+            debugPrint('🆔 Updated session id: ${sessionId.value}');
+          }
+
+          if (transcribed != null && (transcribed as String).isNotEmpty) {
+            textController.text = transcribed as String;
+            debugPrint('✅ Transcribed text: $transcribed');
+          }
+
+          if (success == true && aiResp != null) {
+            final aiMessage = ChatMessage(
+              text: aiResp.toString(),
+              isUser: false,
+              timestamp: DateTime.now(),
+            );
+            messages.add(aiMessage);
+            debugPrint('✅ AI response added: ${aiResp.toString()}');
+          } else {
+            debugPrint('❌ Voice API returned failure or empty response');
+            Get.snackbar(
+              'Error',
+              'AI did not return a response. Please try again.',
+              snackPosition: SnackPosition.BOTTOM,
+            );
+          }
+
+          // Delete the audio file after processing
           try {
             await File(path).delete();
             debugPrint('🗑️ Audio file deleted');
@@ -290,10 +332,10 @@ class AiAssistantController extends GetxController {
             debugPrint('⚠️ Failed to delete audio file: $e');
           }
         } else {
-          debugPrint('❌ Transcription failed');
+          debugPrint('❌ Voice API call failed (null result)');
           Get.snackbar(
             'Error',
-            'Failed to transcribe audio. Please try again.',
+            'Failed to process voice message. Please try again.',
             snackPosition: SnackPosition.BOTTOM,
           );
         }

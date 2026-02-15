@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -165,6 +166,60 @@ class AiService {
       }
     } catch (e) {
       debugPrint('💥 Error transcribing audio: $e');
+      return null;
+    }
+  }
+
+  /// Send recorded audio to the voice chat endpoint and return parsed JSON map
+  /// Expected response keys: 'success', 'response', 'transcribed_text', 'session_id'
+  Future<Map<String, dynamic>?> sendVoiceMessage({
+    required String sessionId,
+    required String audioPath,
+    String audioFormat = 'wav',
+    String language = 'en',
+  }) async {
+    try {
+      debugPrint('🎤 Sending voice message (base64 JSON): $audioPath for session $sessionId');
+
+      // Read and encode audio file as Base64 string to match backend serializer
+      final file = File(audioPath);
+      if (!await file.exists()) {
+        debugPrint('❌ Audio file not found: $audioPath');
+        return null;
+      }
+
+      final bytes = await file.readAsBytes();
+      final base64Audio = base64Encode(bytes);
+
+      final bodyMap = {
+        'audio_data': base64Audio,
+        'audio_format': audioFormat,
+        'session_id': sessionId,
+        'language': language,
+      };
+
+      final headers = await _getHeaders();
+      final body = json.encode(bodyMap);
+
+      debugPrint('📤 Posting JSON to ${Urls.voiceAi} (audio_data length: ${base64Audio.length})');
+      final response = await http.post(
+        Uri.parse(Urls.voiceAi),
+        headers: headers,
+        body: body,
+      );
+
+      debugPrint('📡 Voice API Response: ${response.statusCode}');
+      debugPrint('📄 Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = json.decode(response.body) as Map<String, dynamic>;
+        return data;
+      } else {
+        debugPrint('❌ Voice API failed: ${response.body}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('💥 Error sending voice message: $e');
       return null;
     }
   }
