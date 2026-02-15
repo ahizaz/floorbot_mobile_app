@@ -63,9 +63,9 @@ class AiAssistantController extends GetxController {
 
     if (id != null) {
       sessionId.value = id;
-      debugPrint('✅ Session initialized: $id');
+      debugPrint(' Session initialized: $id');
     } else {
-      debugPrint('❌ Failed to initialize session');
+      debugPrint('Failed to initialize session');
       Get.snackbar(
         'Error',
         'Failed to connect to AI',
@@ -78,7 +78,7 @@ class AiAssistantController extends GetxController {
 
   Future<void> _endSession() async {
     if (sessionId.value != null) {
-      debugPrint('🔚 Closing AI session...');
+      debugPrint(' Closing AI session...');
       EasyLoading.show(status: 'Closing AI...');
 
       await _aiService.endSession(sessionId.value!);

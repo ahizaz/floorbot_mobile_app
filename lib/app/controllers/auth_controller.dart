@@ -346,7 +346,7 @@ class AuthController extends GetxController {
   //   _isLoading.value = true;
 
   //   try {
-  //     // TODO: Implement Google sign in
+
   //     await Future.delayed(const Duration(seconds: 2));
 
   //     Get.snackbar(
