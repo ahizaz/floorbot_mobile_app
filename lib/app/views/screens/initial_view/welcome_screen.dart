@@ -182,7 +182,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         },
                         textColor: theme.colorScheme.onSurface,
                         fontSize: 16.sp,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w500,//
                       ),
                     ],
                   ),

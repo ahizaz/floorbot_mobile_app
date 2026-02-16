@@ -111,9 +111,10 @@ class AiService {
         debugPrint('🎤 Transcribed Text: $transcribedText');
         debugPrint('❌ Error: $error');
 
-        if (success && aiResponse != null) {
-          debugPrint('✅ AI response received successfully');
-          return aiResponse;
+        if (response.body.isNotEmpty) {
+          // Return the full response body so callers can access structured fields like `products`.
+          debugPrint('✅ Returning full AI response body');
+          return response.body;
         } else {
           debugPrint('❌ Failed - Error: $error');
           return null;

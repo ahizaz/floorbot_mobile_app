@@ -1,6 +1,11 @@
 import 'package:floor_bot_mobile/app/controllers/ai_assistant_controller.dart';
 import 'package:floor_bot_mobile/app/core/utils/themes/app_colors.dart';
+import 'dart:convert';
+
 import 'package:floor_bot_mobile/app/views/widgets/ai/ai_prompt_card.dart';
+import 'package:floor_bot_mobile/app/views/widgets/explore/product_card.dart';
+import 'package:floor_bot_mobile/app/views/screens/products/products_details.dart';
+import 'package:floor_bot_mobile/app/models/product.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -214,6 +219,96 @@ class AiAssistantBottomSheet extends StatelessWidget {
   }
 
   Widget _buildChatBubble(ChatMessage message) {
+    // If this is an AI message, try to parse embedded JSON with `products`
+    if (!message.isUser) {
+      try {
+        dynamic decoded;
+        try {
+          decoded = json.decode(message.text);
+        } catch (_) {
+          final idx = message.text.indexOf('{');
+          if (idx != -1) decoded = json.decode(message.text.substring(idx));
+        }
+
+        if (decoded is Map && decoded['products'] is List && (decoded['products'] as List).isNotEmpty) {
+          final raw = decoded['products'] as List;
+          final products = <Product>[];
+          for (final it in raw) {
+            if (it is Map<String, dynamic>) {
+              try {
+                products.add(Product.fromJson(it));
+              } catch (_) {
+                // ignore malformed entries
+              }
+            } else if (it is Map) {
+              try {
+                products.add(Product.fromJson(Map<String, dynamic>.from(it)));
+              } catch (_) {}
+            }
+          }
+
+          final visible = products.where((p) => (p.imageUrl != null && p.imageUrl!.isNotEmpty) || p.id.isNotEmpty).toList();
+          if (visible.isNotEmpty) {
+            String? normalize(String? img) {
+              if (img == null || img.isEmpty) return null;
+              // If it's already an absolute URL, keep as is
+              if (img.startsWith('http')) return img;
+
+              // Normalize duplicated api segments by taking substring from the last '/api/v1'
+              final marker = '/api/v1';
+              final idx = img.lastIndexOf(marker);
+              if (idx != -1) {
+                img = img.substring(idx); // keeps '/api/v1/....' from the last occurrence
+              }
+
+              // Ensure leading slash
+              if (!img.startsWith('/')) img = '/$img';
+
+              return img;
+            }
+
+            return Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+                width: Get.width * 0.95,
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: SizedBox(
+                  height: 210.h,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: visible.length,
+                    separatorBuilder: (_, __) => SizedBox(width: 12.w),
+                    itemBuilder: (context, index) {
+                      final p = visible[index];
+                      final img = normalize(p.imageUrl);
+                      return ProductCard(
+                        imageUrl: img,
+                        title: p.name,
+                        subtitle: p.description,
+                        price: p.price > 0 ? '£${p.price.toStringAsFixed(2)}' : '',
+                        width: p.width,
+                        length: p.length,
+                        onTap: () => Get.to(() => ProductsDetails(product: p)),
+                        onAddTap: () {},
+                        showAddButton: false,
+                      );
+                    },
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+      } catch (e) {
+        // ignore parse errors and fall back to text bubble
+      }
+    }
+
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(

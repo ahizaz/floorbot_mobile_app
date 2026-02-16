@@ -11,6 +11,7 @@ class ProductCard extends StatelessWidget {
   final String price;
   final VoidCallback? onTap;
   final VoidCallback? onAddTap;
+  final bool showAddButton;
   final String? width;
   final String? length;
 
@@ -23,6 +24,7 @@ class ProductCard extends StatelessWidget {
     required this.price,
     this.onTap,
     this.onAddTap,
+    this.showAddButton = true,
     this.width,
     this.length,
   });
@@ -193,22 +195,23 @@ class ProductCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          GestureDetector(
-                            onTap: onAddTap,
-                            child: Container(
-                              width: 24.w, // Reduced size
-                              height: 24.w,
-                              decoration: BoxDecoration(
-                                color: AppColors.primaryColor,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.add,
-                                color: Colors.white,
-                                size: 14.sp, // Reduced icon size
+                          if (showAddButton)
+                            GestureDetector(
+                              onTap: onAddTap,
+                              child: Container(
+                                width: 24.w, // Reduced size
+                                height: 24.w,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primaryColor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                  size: 14.sp, // Reduced icon size
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ),
