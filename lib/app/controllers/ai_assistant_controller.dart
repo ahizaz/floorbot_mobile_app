@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:floor_bot_mobile/app/core/services/ai_service.dart';
 import 'package:floor_bot_mobile/app/models/ai_prompt.dart';
 import 'package:flutter/material.dart';
@@ -180,13 +181,27 @@ class AiAssistantController extends GetxController {
     final response = await _aiService.sendMessage(sessionId.value!, message);
 
     if (response != null) {
-      final aiMessage = ChatMessage(
-        text: response,
-        isUser: false,
-        timestamp: DateTime.now(),
-      );
-      messages.add(aiMessage);
-      debugPrint('✅ AI response added: $response');
+      // `response` is the raw response body (JSON string).
+      try {
+        final decoded = json.decode(response);
+        // If backend returned a `products` list, keep the full JSON so
+        // the UI can render product cards. Otherwise show the human readable
+        // `response` field text only.
+        if (decoded is Map && decoded['products'] != null) {
+          messages.add(ChatMessage(text: response, isUser: false, timestamp: DateTime.now()));
+          debugPrint('✅ AI response (products) added');
+        } else if (decoded is Map && decoded['response'] != null) {
+          messages.add(ChatMessage(text: decoded['response'].toString(), isUser: false, timestamp: DateTime.now()));
+          debugPrint('✅ AI text response added: ${decoded['response']}');
+        } else {
+          messages.add(ChatMessage(text: response.toString(), isUser: false, timestamp: DateTime.now()));
+          debugPrint('✅ AI response added (unstructured)');
+        }
+      } catch (e) {
+        // Not JSON — just add as plain text
+        messages.add(ChatMessage(text: response.toString(), isUser: false, timestamp: DateTime.now()));
+        debugPrint('✅ AI response added (raw): $response');
+      }
     } else {
       debugPrint('❌ Failed to get AI response');
       Get.snackbar(
@@ -310,19 +325,44 @@ class AiAssistantController extends GetxController {
             debugPrint('🆔 Updated session id: ${sessionId.value}');
           }
 
-          if (transcribed != null && (transcribed as String).isNotEmpty) {
-            textController.text = transcribed as String;
+          if (transcribed != null && transcribed.toString().isNotEmpty) {
+            textController.text = transcribed.toString();
             debugPrint('✅ Transcribed text: $transcribed');
           }
 
           if (success == true && aiResp != null) {
-            final aiMessage = ChatMessage(
-              text: aiResp.toString(),
-              isUser: false,
-              timestamp: DateTime.now(),
-            );
-            messages.add(aiMessage);
-            debugPrint('✅ AI response added: ${aiResp.toString()}');
+            try {
+              if (aiResp is String) {
+                final decoded = json.decode(aiResp);
+                if (decoded is Map && decoded['products'] != null) {
+                  messages.add(ChatMessage(text: aiResp, isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI response (products) added');
+                } else if (decoded is Map && decoded['response'] != null) {
+                  messages.add(ChatMessage(text: decoded['response'].toString(), isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI text response added: ${decoded['response']}');
+                } else {
+                  messages.add(ChatMessage(text: aiResp.toString(), isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI response added (unstructured)');
+                }
+              } else if (aiResp is Map) {
+                if (aiResp['products'] != null) {
+                  messages.add(ChatMessage(text: json.encode(aiResp), isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI response (products) added');
+                } else if (aiResp['response'] != null) {
+                  messages.add(ChatMessage(text: aiResp['response'].toString(), isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI text response added: ${aiResp['response']}');
+                } else {
+                  messages.add(ChatMessage(text: aiResp.toString(), isUser: false, timestamp: DateTime.now()));
+                  debugPrint('✅ Voice AI response added (map->string)');
+                }
+              } else {
+                messages.add(ChatMessage(text: aiResp.toString(), isUser: false, timestamp: DateTime.now()));
+                debugPrint('✅ Voice AI response added (fallback)');
+              }
+            } catch (e) {
+              messages.add(ChatMessage(text: aiResp.toString(), isUser: false, timestamp: DateTime.now()));
+              debugPrint('✅ Voice AI response added (raw): ${aiResp.toString()}');
+            }
           } else {
             debugPrint('❌ Voice API returned failure or empty response');
             Get.snackbar(
