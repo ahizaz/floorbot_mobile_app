@@ -54,11 +54,19 @@ class AiService {
   Future<bool> endSession(String sessionId) async {
     try {
       debugPrint('🛑 Ending AI session: $sessionId');
-
       final headers = await _getHeaders();
-      final response = await http.delete(
-        Uri.parse('${Urls.baseUrl}/ai-fetures/session/$sessionId/'),
+
+      // The backend exposes a `session/delete/` endpoint that accepts a POST
+      // with `session_id` in the body. Calling DELETE on `/session/<id>/`
+      // returns a 404 from Django in some deployments. Use the documented
+      // delete endpoint instead.
+      final uri = Uri.parse('${Urls.baseUrl}/ai-fetures/session/delete/');
+      final body = json.encode({'session_id': sessionId});
+
+      final response = await http.post(
+        uri,
         headers: headers,
+        body: body,
       );
 
       debugPrint('📡 Session End Response: ${response.statusCode}');
@@ -66,10 +74,12 @@ class AiService {
       if (response.statusCode == 200 || response.statusCode == 204) {
         debugPrint('✅ Session ended successfully');
         return true;
-      } else {
-        debugPrint('❌ Failed to end session: ${response.body}');
-        return false;
       }
+
+      // If server returned HTML (Django 404 page) or other unexpected body,
+      // avoid logging huge HTML blobs; log a brief message instead.
+      debugPrint('❌ Failed to end session (status ${response.statusCode})');
+      return false;
     } catch (e) {
       debugPrint('💥 Error ending session: $e');
       return false;

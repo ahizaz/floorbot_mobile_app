@@ -40,12 +40,29 @@ class Product {
     // Get item description from API
     final description = json['item_description']?.toString() ?? 'No description available';
     
+    // Normalize image path: keep absolute URLs, otherwise strip duplicated '/api/v1' segments
+    String? rawImage = json['primary_image']?.toString();
+    String? imageUrl;
+    if (rawImage != null && rawImage.isNotEmpty) {
+      if (rawImage.startsWith('http')) {
+        imageUrl = rawImage;
+      } else {
+        const marker = '/api/v1';
+        final idx = rawImage.lastIndexOf(marker);
+        if (idx != -1) {
+          imageUrl = rawImage.substring(idx);
+        } else {
+          imageUrl = rawImage.startsWith('/') ? rawImage : '/$rawImage';
+        }
+      }
+    }
+
     return Product(
       id: json['id'].toString(),
       name: json['product_title'] ?? 'Unnamed Product',
       description: description,
       price: price,
-      imageUrl: json['primary_image'],
+      imageUrl: imageUrl,
       category: json['main_category']?.toString() ?? 'General',
       calculatorConfig: ProductCalculatorConfig.disabled(),
       length: json['length']?.toString(),

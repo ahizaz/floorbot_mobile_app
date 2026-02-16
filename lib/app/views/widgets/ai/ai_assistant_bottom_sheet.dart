@@ -16,6 +16,8 @@ class AiAssistantBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AiAssistantController());
+    // Ensure an AI session exists when the sheet is shown (handles reopen).
+    WidgetsBinding.instance.addPostFrameCallback((_) => controller.ensureSession());
 
     return Container(
       decoration: BoxDecoration(

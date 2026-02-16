@@ -76,6 +76,14 @@ class AiAssistantController extends GetxController {
     EasyLoading.dismiss();
   }
 
+  /// Ensure an AI session exists. Safe to call multiple times; will only
+  /// create a new session if none exists.
+  Future<void> ensureSession() async {
+    if (sessionId.value == null) {
+      await _createSession();
+    }
+  }
+
   Future<void> _endSession() async {
     if (sessionId.value != null) {
       debugPrint(' Closing AI session...');
