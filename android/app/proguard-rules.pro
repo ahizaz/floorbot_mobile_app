@@ -1,0 +1,7 @@
+# R8/ProGuard rules auto-generated from build/mapping/release/missing_rules.txt
+# Suppress warnings for optional Stripe push provisioning classes referenced by react-native-stripe
+-dontwarn com.stripe.android.pushProvisioning.PushProvisioningActivity$g
+-dontwarn com.stripe.android.pushProvisioning.PushProvisioningActivityStarter$Args
+-dontwarn com.stripe.android.pushProvisioning.PushProvisioningActivityStarter$Error
+-dontwarn com.stripe.android.pushProvisioning.PushProvisioningActivityStarter
+-dontwarn com.stripe.android.pushProvisioning.PushProvisioningEphemeralKeyProvider
