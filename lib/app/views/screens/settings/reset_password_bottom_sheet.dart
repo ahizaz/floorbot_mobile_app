@@ -1,8 +1,14 @@
+import 'package:floor_bot_mobile/app/core/utils/urls.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:floor_bot_mobile/app/controllers/auth_controller.dart';
 import 'package:floor_bot_mobile/app/views/screens/auth/views/auth_bottom_sheet.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:floor_bot_mobile/app/views/screens/initial_view/welcome_screen.dart';
 
 class ResetPasswordBottomSheet extends StatefulWidget {
   const ResetPasswordBottomSheet({super.key});
@@ -30,17 +36,65 @@ class _ResetPasswordBottomSheetState extends State<ResetPasswordBottomSheet> {
     super.dispose();
   }
 
-  void _handleSave() {
-    if (_formKey.currentState?.validate() ?? false) {
-     
-      Get.back();
-      Get.snackbar(
-        'Success',
-        'Password changed successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+  Future<void> _handleSave() async {
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final oldPassword = _oldPasswordController.text.trim();
+    final newPassword = _newPasswordController.text.trim();
+
+    EasyLoading.show(status: 'Please wait...');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('access') ?? '';
+
+      final Map<String, String> headers = {
+        'Content-Type': 'application/json',
+      };
+      if (token.isNotEmpty) headers['Authorization'] = 'Bearer $token';
+
+      final body = jsonEncode({
+        'old_password': oldPassword,
+        'new_password': newPassword,
+      });
+
+      debugPrint('ResetPassword: URL: ${Urls.changePassowrd}');
+      debugPrint('ResetPassword body: $body');
+
+      final resp = await http
+          .post(
+            Uri.parse(Urls.changePassowrd),
+            headers: headers,
+            body: body,
+          )
+          .timeout(const Duration(seconds: 30));
+
+      debugPrint('ResetPassword status: ${resp.statusCode}');
+      debugPrint('ResetPassword resp: ${resp.body}');
+
+      EasyLoading.dismiss();
+
+      if (resp.statusCode == 200 || resp.statusCode == 201) {
+        EasyLoading.showSuccess('Password changed successfully');
+
+        // Logout and navigate to Welcome screen
+        final authController = Get.isRegistered<AuthController>()
+            ? Get.find<AuthController>()
+            : Get.put(AuthController());
+        await authController.logout();
+        Get.offAll(() => const WelcomeScreen());
+        return;
+      }
+
+      String message = resp.body;
+      try {
+        final parsed = jsonDecode(resp.body);
+        message = parsed['message'] ?? parsed['error'] ?? message;
+      } catch (_) {}
+      EasyLoading.showError(message);
+    } catch (e) {
+      EasyLoading.dismiss();
+      debugPrint('ResetPassword error: $e');
+      EasyLoading.showError('Failed to change password: ${e.toString()}');
     }
   }
 

@@ -429,8 +429,17 @@ Future<void> signInWithGoogle() async {
     
     debugPrint('Firebase user: ${userCredential.user?.email}');
 
-    // Send Google's original ID token to backend (not Firebase token)
-    final body = jsonEncode({'id_token': googleIdToken});
+    // Also get Firebase ID token (JWT issued by Firebase) which the backend
+    // can verify using Firebase Admin SDK. Send both tokens to backend so
+    // server can perform strict verification before issuing application tokens.
+    final String? firebaseIdToken = await userCredential.user?.getIdToken();
+
+    final body = jsonEncode({
+      'id_token': googleIdToken,
+      'firebase_token': firebaseIdToken,
+      'email': userCredential.user?.email,
+      'uid': userCredential.user?.uid,
+    });
     
     debugPrint('AuthController.signInWithGoogle URL: ${Urls.googleSignIN}');
 

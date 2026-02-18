@@ -8,8 +8,16 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Center(child: SvgPicture.asset(Utils.appLogo)),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Center(
+        child: SvgPicture.asset(
+          Utils.appLogo,
+          // Let the asset render normally; if the app is in dark mode and
+          // the SVG is a single-color asset you can override its color
+          // elsewhere. Using theme background ensures buttons and other
+          // widgets keep their intended contrast in dark mode.
+        ),
+      ),
     );
   }
 }
