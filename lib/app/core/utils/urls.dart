@@ -17,7 +17,7 @@ class Urls {
   static const String bestDeals = "$baseUrl/users/products/?search=best";
   //static const String search ="$baseUrl/users/products/?search=soft carpet";
   static String searchProducts(String query) =>
-      "$baseUrl/users/products/?search=$query";
+      "$baseUrl/users/products/?search=${Uri.encodeQueryComponent(query)}";
   static const String updateProfile = "$baseUrl/users/profile-data/";
   static const String confirmorders = "$baseUrl/users/orders/";
   static const String userOrders = "$baseUrl/users/orders/";

@@ -22,6 +22,8 @@ class SearchTab extends StatelessWidget {
             controller: controller.searchTextController,
             onCancel: () {
               controller.clearSearch();
+              // also remove focus so the keyboard closes and UI updates immediately
+              FocusScope.of(context).unfocus();
             },
             onChanged: (value) {
               // Search is handled by listener in controller

@@ -10,10 +10,12 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductSearchController extends GetxController {
   final TextEditingController searchTextController = TextEditingController();
+  Timer? _debounce;
   final RxString searchQuery = ''.obs;
   final RxList<String> suggestedChips = <String>[].obs;
   final RxList<Product> searchResults = <Product>[].obs;
@@ -34,10 +36,16 @@ class ProductSearchController extends GetxController {
 
     // Listen to text changes for real-time search
     searchTextController.addListener(() {
-      searchQuery.value = searchTextController.text;
-      if (searchTextController.text.isNotEmpty) {
-        _performSearch(searchTextController.text);
+      final text = searchTextController.text;
+      searchQuery.value = text;
+      if (text.isNotEmpty) {
+        // debounce rapid input to avoid stale/irrelevant responses
+        _debounce?.cancel();
+        _debounce = Timer(const Duration(milliseconds: 400), () {
+          _performSearch(text);
+        });
       } else {
+        _debounce?.cancel();
         searchResults.clear();
         isSearching.value = false;
       }
@@ -46,6 +54,7 @@ class ProductSearchController extends GetxController {
 
   @override
   void onClose() {
+    _debounce?.cancel();
     searchTextController.dispose();
     super.onClose();
   }
