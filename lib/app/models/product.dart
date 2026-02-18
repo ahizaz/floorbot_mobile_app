@@ -64,7 +64,21 @@ class Product {
       price: price,
       imageUrl: imageUrl,
       category: json['main_category']?.toString() ?? 'General',
-      calculatorConfig: ProductCalculatorConfig.disabled(),
+      calculatorConfig: (() {
+        final isCalculateRaw = json['is_calculate'];
+        final isCalculate = (isCalculateRaw == true) ||
+            (isCalculateRaw?.toString().toLowerCase() == 'true');
+
+        // Prefer 'pack_coverage' then 'coverage_per_pack' from API
+        final coverageStr = json['pack_coverage'] ?? json['coverage_per_pack'];
+        final coverage = double.tryParse(coverageStr?.toString() ?? '') ?? 0.0;
+
+        if (isCalculate && coverage > 0) {
+          return ProductCalculatorConfig.boxBased(coveragePerBox: coverage);
+        }
+
+        return ProductCalculatorConfig.disabled();
+      })(),
       length: json['length']?.toString(),
       width: json['width']?.toString(),
       returnPolicy: json['return_policy']?.toString(),
